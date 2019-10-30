@@ -1,4 +1,4 @@
-package drivers;
+package drivers.IoTConnector;
 
 import com.amazonaws.services.iot.client.AWSIotException;
 

@@ -20,6 +20,14 @@
         </plugins>
     </build>
 
+    <properties>
+        <arcgis.version>10.2.4</arcgis.version>
+    </properties>
+
+    <repositories>
+
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>com.amazonaws</groupId>

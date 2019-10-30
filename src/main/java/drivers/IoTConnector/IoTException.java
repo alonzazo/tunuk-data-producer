@@ -1,4 +1,4 @@
-package drivers;
+package drivers.IoTConnector;
 
 public interface IoTException {
 }

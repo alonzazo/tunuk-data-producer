@@ -1,4 +1,4 @@
-package drivers;
+package drivers.IoTConnector;
 
 import utils.SampleUtil;
 import com.amazonaws.services.iot.client.AWSIotException;
@@ -8,7 +8,6 @@ import com.amazonaws.services.iot.client.AWSIotQos;
 
 
 import java.io.FileInputStream;
-import java.security.KeyStore;
 import java.util.Properties;
 
 
@@ -70,7 +69,7 @@ public class AWSIoTConnector implements IoTConnector {
 
     }
 
-    public void start() throws AWSIoTConnectorException {
+    public void publish(String topic, String message) throws AWSIoTConnectorException {
         class MyMessage extends AWSIotMessage {
             public MyMessage(String topic, AWSIotQos qos, String payload) {
                 super(topic, qos, payload);
@@ -92,14 +91,12 @@ public class AWSIoTConnector implements IoTConnector {
             }
         }
 
-        String topic = "my/own/topic";
         AWSIotQos qos = AWSIotQos.QOS0;
-        String payload = "como me le va";
         long timeout = 3000;                    // milliseconds
 
-        MyMessage message = new MyMessage(topic, qos, payload);
+        MyMessage myMessage = new MyMessage(topic, qos, message);
         try {
-            client.publish(message, timeout);
+            client.publish(myMessage, timeout);
         } catch (AWSIotException e) {
             throw new AWSIoTConnectorException(e);
         }
