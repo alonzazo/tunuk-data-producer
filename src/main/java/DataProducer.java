@@ -40,10 +40,10 @@ public class DataProducer {
             String currentTimestamp = getTime();
 
             // ------------------------------------------------------------------------TRANSMIT THE MESSAGE TO IOTSERVER
-            /*ioTConnector.publish("my/own/topic", "estamos trasmitiendo");
+            ioTConnector.publish("my/own/topic", "estamos trasmitiendo");
 
             // -----------------------------------------------------------------------------------------CLOSE CONNECTION
-            ioTConnector.close();*/
+            ioTConnector.close();
 
         }catch (AWSIoTConnectorException e){
             e.printStackTrace();
