@@ -1,6 +1,5 @@
 import drivers.IoTConnector;
 import factories.*;
-import drivers.AWSIoTConnector.AWSIoTConnectorException;
 import drivers.DataDriver;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONException;
