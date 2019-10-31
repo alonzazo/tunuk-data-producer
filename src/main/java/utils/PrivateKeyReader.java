@@ -128,7 +128,7 @@ public class PrivateKeyReader {
             }
         }
         KeySpec keySpec = null;
-        byte[] encoded = Base64.decodeBase64(builder.toString());
+        byte[] encoded = Base64.decodeBase64(builder.toString().getBytes());
         if (isRSAKey) {
             keySpec = getRSAKeySpec(encoded);
         } else {
