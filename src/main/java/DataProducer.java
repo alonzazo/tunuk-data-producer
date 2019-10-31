@@ -1,12 +1,15 @@
-import drivers.IoTConnector.IoTConnector;
+import drivers.IoTConnector;
 import factories.*;
-import drivers.GPSConnector.GPSConnector;
-import drivers.IoTConnector.AWSIoTConnectorException;
-import drivers.APCConnector.APCConnector;
+import drivers.AWSIoTConnector.AWSIoTConnectorException;
+import drivers.DataDriver;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 
 public class DataProducer {
 
@@ -23,24 +26,28 @@ public class DataProducer {
             ioTConnector.connect();
 
             // ---------------------------------------------------------------------------------GATHER DATA FROM SENSORS
+            List<Map<String,String>> dataList = new LinkedList<>();
+
             // Gather GPS data
-            GPSConnector gpsConnector = GPSConnectorFactory.create(GPSConnectorType.DELL_3003);
-            Map<String, String> gpsData = gpsConnector.getCurrentData();
+            DataDriver gpsDataDriver = ConnectorFactory.create(ConnectorType.DELL_3003);
+            dataList.add(gpsDataDriver.getData());
 
             // Gather AutomaticPeopleCounter(APC) data
-            APCConnector apcConnector = APCConnectorFactory.create(APCConnectorType.Hella_APC_ECO_RS485, 1, "192.168.1.1", 10076);
-            Map<String,String> apcData = apcConnector.getData();
-
-            // Gather seniors data
+            DataDriver apcDataDriver = ConnectorFactory.create(ConnectorType.Hella_APC_ECO_RS485);
+            dataList.add(apcDataDriver.getData());
 
             // Gather CAN-BUS data
 
             // --------------------------------------------------------------------------------------COMPOSE THE MESSAGE
-            // Get the current TimeStamp
-            String currentTimestamp = getTime();
+
+            // Cargar datos de identidad del bus
+            Properties identity = loadFileProperties(DataProducer.class.getResource("configurations/identity.properties").getPath());
+
+            // Se compone el mensaje
+            String message = composeMessage(identity, dataList);
 
             // ------------------------------------------------------------------------TRANSMIT THE MESSAGE TO IOTSERVER
-            ioTConnector.publish("my/own/topic", "estamos trasmitiendo");
+            ioTConnector.publish("dell3003test", message);
 
             // -----------------------------------------------------------------------------------------CLOSE CONNECTION
             ioTConnector.close();
@@ -54,9 +61,49 @@ public class DataProducer {
         }
     }
 
+    private static Properties loadFileProperties(String propertiesPathFile) throws IOException {
+        FileInputStream fileInputStream = new FileInputStream(propertiesPathFile);
+
+        Properties properties = new Properties();
+        properties.load(fileInputStream);
+
+        return properties;
+    }
+
+    private static String composeMessage(Properties identity, List<Map<String, String>> dataList) throws IOException, JSONException {
+        // Get the current TimeStamp
+        String currentTimestamp = getTime();
+
+        // Creamos un json array a partir de los lista de los mapas datos
+        String jsonDataArray = getJsonDataArray(dataList);
+
+        //Componemos el JsonFinal
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("eventId",identity.getProperty("eventId"));
+        jsonObject.put("busId",identity.getProperty("busId"));
+        jsonObject.put("companyId",identity.getProperty("companyId"));
+        jsonObject.put("deviceId",identity.getProperty("deviceId"));
+        jsonObject.put("timestamp",currentTimestamp);
+        jsonObject.put("data",jsonDataArray);
+
+        return jsonObject.toString();
+    }
+
     private static String getTime(){
         SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss z");
         Date date = new Date(System.currentTimeMillis());
         return formatter.format(date);
+    }
+
+    private static String getJsonDataArray(List<Map<String,String>> dataList) throws IOException {
+        ObjectMapper mapToJsonMapper = new ObjectMapper();
+
+        StringBuilder dataArray = new StringBuilder("[");
+
+        for (Map<String, String> data: dataList){
+            dataArray.append(mapToJsonMapper.writeValueAsString(data)).append(",");
+        }
+
+        return dataArray.substring(0, dataArray.length() - 1) + "]";
     }
 }

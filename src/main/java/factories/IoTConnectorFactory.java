@@ -1,7 +1,7 @@
 package factories;
 
-import drivers.IoTConnector.AWSIoTConnector;
-import drivers.IoTConnector.IoTConnector;
+import drivers.AWSIoTConnector.AWSIoTConnector;
+import drivers.IoTConnector;
 
 public class IoTConnectorFactory {
 

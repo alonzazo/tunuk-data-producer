@@ -1,4 +1,6 @@
-package drivers.APCConnector;
+package drivers.APCDataDriver;
+
+import drivers.DataDriver;
 
 import java.io.IOException;
 import java.net.*;
@@ -6,8 +8,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HellaAPCECORS485APCConnector implements APCConnector {
-    public HellaAPCECORS485APCConnector(int doorId, String ipAddress, int port) {
+public class HellaAPCECORS485DataDriver implements DataDriver {
+    public HellaAPCECORS485DataDriver(int doorId, String ipAddress, int port) {
         this.doorProperties.id = doorId;
         this.doorProperties.ipAddress = ipAddress;
         this.doorProperties.port = port;

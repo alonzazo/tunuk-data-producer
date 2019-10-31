@@ -1,5 +1,6 @@
-package drivers.IoTConnector;
+package drivers.AWSIoTConnector;
 
+import drivers.IoTConnector;
 import utils.SampleUtil;
 import com.amazonaws.services.iot.client.AWSIotException;
 import com.amazonaws.services.iot.client.AWSIotMessage;

@@ -1,14 +1,15 @@
-package drivers.GPSConnector;
+package drivers.GPSDataDriver;
 
 import com.esri.core.gps.*;
 import com.esri.map.GPSLayer;
+import drivers.DataDriver;
 
 import java.util.Map;
 
 
-public class Dell3003GPSConnector implements GPSConnector {
+public class Dell3003GPSDataDriver implements DataDriver {
     @Override
-    public Map<String, String> getCurrentData() throws Exception{
+    public Map<String, String> getData() throws Exception{
 
         // create SerialPortInfo for a port named "COM2"
         SerialPortInfo myPortInfo = new SerialPortInfo(
