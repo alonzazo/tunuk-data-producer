@@ -1,5 +1,7 @@
 package drivers;
 
+import drivers.AWSIoTConnector.AWSIoTConnectorException;
+
 public interface IoTConnector {
     void connect() throws AWSIoTConnectorException;
     void reset() throws AWSIoTConnectorException;
