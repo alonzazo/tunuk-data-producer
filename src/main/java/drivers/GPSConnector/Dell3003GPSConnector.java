@@ -38,7 +38,6 @@ public class Dell3003GPSConnector implements GPSConnector {
         myWatcher.start();
         GPSLayer gpsLayer = new GPSLayer(myWatcher);
 
-
         return null;
     }
 }

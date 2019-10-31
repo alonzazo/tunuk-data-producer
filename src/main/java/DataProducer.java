@@ -28,7 +28,7 @@ public class DataProducer {
             Map<String, String> gpsData = gpsConnector.getCurrentData();
 
             // Gather AutomaticPeopleCounter(APC) data
-            APCConnector apcConnector = APCConnectorFactory.create(APCConnectorType.Hella_APC_ECO_RS485);
+            APCConnector apcConnector = APCConnectorFactory.create(APCConnectorType.Hella_APC_ECO_RS485, 1, "192.168.1.1", 10076);
             Map<String,String> apcData = apcConnector.getData();
 
             // Gather seniors data
