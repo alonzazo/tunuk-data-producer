@@ -1,6 +1,9 @@
 import drivers.IoTConnector;
 import factories.*;
 import drivers.DataDriver;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,6 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class DataProducer {
+    private static final Logger log = LogManager.getLogger("ConsoleFile");
 
     public static void main(String args[]){
 
@@ -53,6 +57,7 @@ public class DataProducer {
         } catch (Exception e){
             e.printStackTrace();
             System.out.println(e.getMessage());
+            log.error(e.getMessage());
         }
     }
 

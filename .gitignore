@@ -1,3 +1,4 @@
 /.idea/
 /privileges/
 /target/
+/log4j.properties
