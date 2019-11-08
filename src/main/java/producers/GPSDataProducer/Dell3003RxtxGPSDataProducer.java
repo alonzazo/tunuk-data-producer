@@ -1,41 +1,47 @@
-package drivers.GPSDataDriver;
+package producers.GPSDataProducer;
 
-import EventListener.EventListener;
-import drivers.AWSIoTConnector.AWSIoTConnectorException;
-import drivers.DataDriver;
+import producers.DataProducer;
 
 
 import jssc.SerialPort; import jssc.SerialPortEvent; import jssc.SerialPortEventListener; import jssc.SerialPortException;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.GGASentence;
 import net.sf.marineapi.nmea.util.Position;
-import org.json.JSONException;
+import utils.DataBus;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Dell3003rxtxGPSDataDriver implements DataDriver, SerialPortEventListener {
+public class Dell3003RxtxGPSDataProducer implements DataProducer, SerialPortEventListener {
 
 
     private SerialPort serialPort;
     private String residualStream = "";
-    private EventListener eventListener;
+    private DataBus dataBus;
 
-    public Dell3003rxtxGPSDataDriver(EventListener eventListener) {
-        this.eventListener = eventListener;
+    public Dell3003RxtxGPSDataProducer(DataBus dataBus) {
+        this.dataBus = dataBus;
     }
 
     @Override
-    public Map<String, String> getData() throws Exception {
+    public DataBus getDataBus() {
+        return dataBus;
+    }
+
+    @Override
+    public void setDataBus(DataBus dataBus) {
+        this.dataBus = dataBus;
+    }
+
+    @Override
+    public void startProduction() throws Exception {
 
         serialPort = new SerialPort("/dev/ttyHS0");
         System.out.println("Port opened: " + serialPort.openPort());
         System.out.println("Params setted: " + serialPort.setParams(9600, 8, 1, 0));//Set params.
         serialPort.addEventListener(this);//Add SerialPortEventListener
 
-        return null;
     }
 
     @Override
@@ -64,25 +70,13 @@ public class Dell3003rxtxGPSDataDriver implements DataDriver, SerialPortEventLis
                     gpsData.putAll(parseNMEASentence(lines[i]));
                     System.out.println(lines[i]);
                 }
-                // Corremos el listener que quiera el cliente
-                eventListener.listen(gpsData);
-
-                /*// Cerramos conexion
-                serialPort.removeEventListener();
-                System.out.println("EventListener removed");
-                serialPort.closePort();
-                System.out.println("Port " + serialPort.getPortName() + " closed");
-                */
+                // Publicamos los datos en el bus de datos
+                dataBus.publishData(this.getClass(), gpsData);
             }
         }
+
         catch (SerialPortException ex) {
             System.out.println(ex.getMessage());
-        } catch (AWSIoTConnectorException e) {
-            System.out.println(e.getMessage());
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        } catch (JSONException e) {
-            System.out.println(e.getMessage());
         }
     }
 

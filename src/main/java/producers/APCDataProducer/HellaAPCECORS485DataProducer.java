@@ -1,6 +1,7 @@
-package drivers.APCDataDriver;
+package producers.APCDataProducer;
 
-import drivers.DataDriver;
+import producers.DataProducer;
+import utils.DataBus;
 
 import java.io.IOException;
 import java.net.*;
@@ -8,13 +9,23 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HellaAPCECORS485DataDriver implements DataDriver {
-    public HellaAPCECORS485DataDriver(int doorId, String ipAddress, int port) {
+public class HellaAPCECORS485DataProducer implements DataProducer {
+    public HellaAPCECORS485DataProducer(int doorId, String ipAddress, int port) {
         this.doorProperties.id = doorId;
         this.doorProperties.ipAddress = ipAddress;
         this.doorProperties.port = port;
         this.doorProperties.date = new Date(System.currentTimeMillis());
         this.doorProperties.isOpened = false;
+    }
+
+    @Override
+    public DataBus getDataBus() {
+        return null;
+    }
+
+    @Override
+    public void setDataBus(DataBus dataBus) {
+
     }
 
     private Door doorProperties = new Door();
@@ -41,7 +52,7 @@ public class HellaAPCECORS485DataDriver implements DataDriver {
     }
 
     @Override
-    public Map<String, String> getData() throws Exception {
+    public void startProduction() throws Exception {
         //Consultamos el estado de la puerta 'VDV2bW'
         String doorState = sendRequest("VDV2bW"+doorProperties.id);
 
@@ -74,7 +85,6 @@ public class HellaAPCECORS485DataDriver implements DataDriver {
 
                 extendedData.put("doorId",String.valueOf(doorProperties.id));
                 extendedData.put("duration", String.valueOf(duration));
-                return extendedData;
             } else {
                 throw new Exception("There is no data in the door " + doorProperties.id);
             }
@@ -92,7 +102,6 @@ public class HellaAPCECORS485DataDriver implements DataDriver {
             //  Notificamos que es desconocido
             throw new Exception("The state of door " + doorProperties.id + " is unknown");
         }
-        return null;
     }
 
     public Map<String,String> getInOutPassengersCount() throws IOException {

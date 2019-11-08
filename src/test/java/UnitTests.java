@@ -1,4 +1,5 @@
-import drivers.GPSDataDriver.Dell3003rxtxGPSDataDriver;
+import producers.GPSDataProducer.Dell3003RxtxGPSDataProducer;
+import utils.SyncronizedDataBus;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -8,12 +9,12 @@ import java.util.Map;
 public class UnitTests {
 
     private static void dell3003rxtxGPSDataDriver() throws Exception {
-        Dell3003rxtxGPSDataDriver rxtxGPSDataDriver = new Dell3003rxtxGPSDataDriver(System.out::println);
-        System.out.println(rxtxGPSDataDriver.getData().toString());
+        Dell3003RxtxGPSDataProducer rxtxGPSDataDriver = new Dell3003RxtxGPSDataProducer(new SyncronizedDataBus());
+        rxtxGPSDataDriver.startProduction();
     }
 
     private static void parseSentence(){
-        Dell3003rxtxGPSDataDriver rxtxGPSDataDriver = new Dell3003rxtxGPSDataDriver(System.out::println);
+        Dell3003RxtxGPSDataProducer rxtxGPSDataDriver = new Dell3003RxtxGPSDataProducer(new SyncronizedDataBus());
         String result = "";
         result += rxtxGPSDataDriver.parseNMEASentence("$GNGGA,184208.00,,,,,0,00,99.99,,,,,,*7F") + "\n";
         result += rxtxGPSDataDriver.parseNMEASentence("$GNGSA,A,1,,,,,,,,,,,,,99.99,99.99,99.99*2E") + "\n" ;

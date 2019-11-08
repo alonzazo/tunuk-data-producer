@@ -1,25 +1,25 @@
-package drivers.GPSDataDriver;
+package producers.GPSDataProducer;
 
 import com.esri.core.gps.*;
-import com.esri.map.GPSLayer;
-import drivers.DataDriver;
+import producers.DataProducer;
+import utils.DataBus;
 
 import java.util.Map;
 
 
-public class Dell3003ArcGISGPSDataDriver implements DataDriver {
+public class Dell3003ArcGISGPSDataProducer implements DataProducer {
 
     private String portName;
 
-    public Dell3003ArcGISGPSDataDriver(String portName){
+    public Dell3003ArcGISGPSDataProducer(String portName){
         this.portName = portName;
     }
     @Override
-    public Map<String, String> getData() throws Exception{
+    public void startProduction() throws Exception{
 
         // create SerialPortInfo for a port named "COM2"
         SerialPortInfo myPortInfo = new SerialPortInfo(
-                portName, BaudRate.BAUD_4800, Parity.NONE, StopBits.ONE, 7);
+                portName, BaudRate.BAUD_9600, Parity.NONE, StopBits.ONE, 7);
         SerialPortGPSWatcher myWatcher = new SerialPortGPSWatcher(myPortInfo);
         myWatcher.addListener(new GPSEventListener() {
             @Override
@@ -43,8 +43,15 @@ public class Dell3003ArcGISGPSDataDriver implements DataDriver {
             }
         });
         myWatcher.start();
-        GPSLayer gpsLayer = new GPSLayer(myWatcher);
+    }
 
+    @Override
+    public DataBus getDataBus() {
         return null;
+    }
+
+    @Override
+    public void setDataBus(DataBus dataBus) {
+
     }
 }
