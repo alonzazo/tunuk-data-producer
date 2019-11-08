@@ -2,3 +2,6 @@
 /privileges/
 /target/
 /log4j.properties
+/META-INF/
+/deployment-tools/
+/libs/

@@ -7,13 +7,19 @@ import drivers.DataDriver;
 import java.util.Map;
 
 
-public class Dell3003GPSDataDriver implements DataDriver {
+public class Dell3003ArcGISGPSDataDriver implements DataDriver {
+
+    private String portName;
+
+    public Dell3003ArcGISGPSDataDriver(String portName){
+        this.portName = portName;
+    }
     @Override
     public Map<String, String> getData() throws Exception{
 
         // create SerialPortInfo for a port named "COM2"
         SerialPortInfo myPortInfo = new SerialPortInfo(
-                "/dev/ttyS0", BaudRate.BAUD_4800, Parity.NONE, StopBits.ONE, 7);
+                portName, BaudRate.BAUD_4800, Parity.NONE, StopBits.ONE, 7);
         SerialPortGPSWatcher myWatcher = new SerialPortGPSWatcher(myPortInfo);
         myWatcher.addListener(new GPSEventListener() {
             @Override

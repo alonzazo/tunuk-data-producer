@@ -20,41 +20,77 @@ public class DataProducer {
 
         try {
 
+            List<String> argList = Arrays.asList(args);
+
+            // -------------------------------------------------------------------------------------------- INITIALIZING
+            Properties identity;
+            // Cargar datos de identidad del bus
+            if (argList.contains("--debug")){
+                identity = loadFileProperties(DataProducer.class.getResource("configurations/identity.properties").getPath());
+            }else {
+                identity = loadFileProperties("configurations/identity.properties");
+            }
             // ------------------------------------------------------------------------------------- CONFIGURE IOTSERVER
             IoTConnector ioTConnector = IoTConnectorFactory.create(IoTConnectorType.AMAZON_WEB_SERVICES);
 
-            ioTConnector.configure(DataProducer.class.getResource("configurations/aws-config.properties").getPath());
+            if (argList.contains("--debug")){
+                ioTConnector.configure(DataProducer.class.getResource("configurations/aws-config.properties").getPath());
+            }else {
+                ioTConnector.configure("configurations/aws-config.properties");
+            }
+
 
             // -------------------------------------------------------------------------------------CONNECT TO IOTSERVER
             ioTConnector.connect();
-
             // ---------------------------------------------------------------------------------GATHER DATA FROM SENSORS
             List<Map<String,String>> dataList = new LinkedList<>();
+/*
+            boolean stopFlag = false;
+            while (!stopFlag){*/
 
-            // Gather GPS data
-            DataDriver gpsDataDriver = ConnectorFactory.create(ConnectorType.DELL_3003);
-            dataList.add(gpsDataDriver.getData());
+                // Gather GPS data
+                if (argList.contains("--marine-api")) {
+                    DataDriver gpsDataDriver = ConnectorFactory.create(ConnectorType.DELL_3003_MARINE_API);
+                    dataList.add(gpsDataDriver.getData());
+                }else if (argList.contains("--rxtx")){
+                    DataDriver gpsDataDriver = ConnectorFactory.create(ConnectorType.DELL_3003_RXTX, (gpsData) -> {
+                        dataList.add(gpsData);
+                        // --------------------------------------------------------------------------------------COMPOSE THE MESSAGE
+                        // Se compone el mensaje
+                        String message = composeMessage(identity, dataList);
+                        System.out.println(message);
+                        // ------------------------------------------------------------------------TRANSMIT THE MESSAGE TO IOTSERVER
+                        ioTConnector.publish("dell3003test", message);
 
-            // Gather AutomaticPeopleCounter(APC) data
-            DataDriver apcDataDriver = ConnectorFactory.create(ConnectorType.Hella_APC_ECO_RS485);
-            dataList.add(apcDataDriver.getData());
+                        dataList.clear();
 
-            // Gather CAN-BUS data
+                    });
+                    gpsDataDriver.getData();
+                } else {
+                    DataDriver gpsDataDriver = ConnectorFactory.create(ConnectorType.DELL_3003_ARCGIS,"/dev/ttyHS0");
+                    dataList.add(gpsDataDriver.getData());
+                }
 
-            // --------------------------------------------------------------------------------------COMPOSE THE MESSAGE
+                // Gather AutomaticPeopleCounter(APC) data
+                /*DataDriver apcDataDriver = ConnectorFactory.create(ConnectorType.Hella_APC_ECO_RS485);
+                dataList.add(apcDataDriver.getData());*/
 
-            // Cargar datos de identidad del bus
-            Properties identity = loadFileProperties(DataProducer.class.getResource("configurations/identity.properties").getPath());
+                // Gather CAN-BUS data
+                // --------------------------------------------------------------------------------------COMPOSE THE MESSAGE
+                // Se compone el mensaje
+                /*String message = composeMessage(identity, dataList);
+                System.out.println(message);
+                // ------------------------------------------------------------------------TRANSMIT THE MESSAGE TO IOTSERVER
+                ioTConnector.publish("dell3003test", message);
 
-            // Se compone el mensaje
-            String message = composeMessage(identity, dataList);
-
-            // ------------------------------------------------------------------------TRANSMIT THE MESSAGE TO IOTSERVER
-            ioTConnector.publish("dell3003test", message);
-
+                dataList.clear();
+                Thread.sleep(1000); // Wait a second.*/
+            /*}*/
             // -----------------------------------------------------------------------------------------CLOSE CONNECTION
-            ioTConnector.close();
+            //ioTConnector.close();
+
         } catch (Exception e){
+
             e.printStackTrace();
             System.out.println(e.getMessage());
             log.error(e.getMessage());
@@ -98,12 +134,14 @@ public class DataProducer {
     private static String getJsonDataArray(List<Map<String,String>> dataList) throws IOException {
         ObjectMapper mapToJsonMapper = new ObjectMapper();
 
-        StringBuilder dataArray = new StringBuilder("[");
+        StringBuilder dataArray = new StringBuilder();
 
         for (Map<String, String> data: dataList){
             dataArray.append(mapToJsonMapper.writeValueAsString(data)).append(",");
         }
-
-        return dataArray.substring(0, dataArray.length() - 1) + "]";
+        if (dataArray.length() != 0)
+            return "[" + dataArray.substring(0, dataArray.length() - 1) + "]";
+        else
+            return "[]";
     }
 }
