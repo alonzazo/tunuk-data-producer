@@ -1,17 +1,11 @@
 import connectors.IoTConnector;
 import consumers.DataBusPublisher;
 import consumers.IoTDataBusPublisher;
-import factories.DataProducerFactory;
-import factories.DataProducerType;
-import factories.IoTConnectorFactory;
-import factories.IoTConnectorType;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import factories.*;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONObject;
 import producers.DataProducer;
 import utils.DataBus;
-import utils.SyncronizedDataBus;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -20,14 +14,14 @@ import java.util.*;
 import java.util.function.Function;
 
 public class DataProducerApplication {
-    private static final Logger log = LogManager.getLogger("ConsoleFile");
+    /*public static final Logger log = LogManager.getLogger("ConsoleFile");*/
 
     public static void main(String args[]){
 
         try {
 
             List<String> argList = Arrays.asList(args);
-            SyncronizedDataBus dataBus = new SyncronizedDataBus(); // TODO Create a factory for this
+            DataBus dataBus = DataBusFactory.create(DataBusType.SYNCRONIZED);
 
             // -------------------------------------------------------------------------------------------- INITIALIZING
             Properties identity;
@@ -38,7 +32,13 @@ public class DataProducerApplication {
                 identity = loadFileProperties("configurations/identity.properties");
             }
             // ------------------------------------------------------------------------------------- CONFIGURE IOTSERVER
-            IoTConnector ioTConnector = IoTConnectorFactory.create(IoTConnectorType.STANDARD_OUTPUT);
+
+            IoTConnector ioTConnector;
+            if (argList.contains("--stdout")){
+                ioTConnector = IoTConnectorFactory.create(IoTConnectorType.STANDARD_OUTPUT);
+            } else {
+                ioTConnector = IoTConnectorFactory.create(IoTConnectorType.AMAZON_WEB_SERVICES);
+            }
 
             if (argList.contains("--debug")){
                 ioTConnector.configure(DataProducerApplication.class.getResource("configurations/aws-config.properties").getPath());
@@ -55,9 +55,13 @@ public class DataProducerApplication {
             DataProducer gpsDataProducer = DataProducerFactory.create(DataProducerType.DELL_3003_RXTX, dataBus);
             gpsDataProducer.startProduction();
 
+
             // Gather AutomaticPeopleCounter(APC) data
-            /*DataDriver apcDataDriver = ConnectorFactory.create(ConnectorType.Hella_APC_ECO_RS485, dataBus);
-            dataList.add(apcDataDriver.getData());*/
+            DataProducer apcDataProducer1 = DataProducerFactory.create(DataProducerType.Hella_APC_ECO_RS485, dataBus,1,"10.42.1.221",10076);
+            apcDataProducer1.startProduction();
+
+            DataProducer apcDataProducer2 = DataProducerFactory.create(DataProducerType.Hella_APC_ECO_RS485, dataBus,2,"10.42.2.222",10076);
+            apcDataProducer2.startProduction();
 
             // Gather CAN-BUS data
             // ---------------------------------------------------------------------------FILTER AND COMPOSE THE MESSAGE
@@ -74,14 +78,14 @@ public class DataProducerApplication {
             DataBusPublisher dataBusPublisher = new IoTDataBusPublisher(dataBus, ioTConnector, "dell3003test", composerFunction);
             dataBusPublisher.startPublish();
 
+
             // -----------------------------------------------------------------------------------------CLOSE CONNECTION
-            ioTConnector.close();
+            //ioTConnector.close();
 
         } catch (Exception e){
 
             e.printStackTrace();
             System.out.println(e.getMessage());
-            log.error(e.getMessage());
         }
     }
 

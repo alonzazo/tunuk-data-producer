@@ -45,4 +45,17 @@ public class DataProducerFactory {
                 throw new Exception("APCConnector is not well specified.");
         }
     }
+
+    public static DataProducer create(DataProducerType dataProducerType, DataBus dataBus, int doorId, String ipAddress, int port) throws Exception { //TODO Make an abstract factory to avoid this
+        switch (dataProducerType){
+            case Hella_APC_ECO_RS485:
+                return createHellaAPCProducer(doorId, ipAddress, port);
+            case DELL_3003_ARCGIS:
+                return createDell3003ArcGISGPSDataProducer();
+            case DELL_3003_RXTX:
+                return createDell3003rxtxGPSDataProducer(dataBus);
+            default:
+                throw new Exception("APCConnector is not well specified.");
+        }
+    }
 }

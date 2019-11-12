@@ -54,4 +54,54 @@ public class Dell3003ArcGISGPSDataProducer implements DataProducer {
     public void setDataBus(DataBus dataBus) {
 
     }
+
+    @Override
+    public void setBrand(String brandName) {
+
+    }
+
+    @Override
+    public String getBrand() {
+        return null;
+    }
+
+    @Override
+    public void setModel(String modelName) {
+
+    }
+
+    @Override
+    public String getModel() {
+        return null;
+    }
+
+    @Override
+    public void setSerial(String serial) {
+
+    }
+
+    @Override
+    public String getSerial() {
+        return null;
+    }
+
+    @Override
+    public void setDataScheme(String dataScheme) {
+
+    }
+
+    @Override
+    public String getDataScheme() {
+        return null;
+    }
+
+    @Override
+    public void setControllerVersion(String controllerVersion) {
+
+    }
+
+    @Override
+    public String getControllerVersion() {
+        return null;
+    }
 }

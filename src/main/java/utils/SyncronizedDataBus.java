@@ -1,16 +1,16 @@
 package utils;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SyncronizedDataBus implements DataBus {
 
     private Map<Class<?>, List<Map<String,String>>> dataBus;
 
     public SyncronizedDataBus() {
-        dataBus = new HashMap<>();
+        dataBus = new ConcurrentHashMap<>();
     }
 
     @Override
