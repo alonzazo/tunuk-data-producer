@@ -1,20 +1,51 @@
-package drivers.APCDataDriver;
+package producers.APCDataProducer;
 
-import drivers.DataDriver;
+import producers.DataProducer;
+import utils.DataBus;
 
 import java.io.IOException;
-import java.net.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HellaAPCECORS485DataDriver implements DataDriver {
-    public HellaAPCECORS485DataDriver(int doorId, String ipAddress, int port) {
+public class HellaAPCECORS485DataProducer implements DataProducer, Runnable {
+
+    private enum DoorState {DOOR_OPENED, DOOR_CLOSED, DOOR_UNKNOWN};
+
+    private DataBus dataBus;
+
+    private static class DataProducerIdentity {
+        String brand = "Hella",
+                model= "APC-ECO-RS485",
+                serial="",
+                dataScheme="APC",
+                controllerVersion="1.0",
+                description="";
+    }
+    private DataProducerIdentity identity = new DataProducerIdentity();
+
+    public HellaAPCECORS485DataProducer(int doorId, String ipAddress, int port) {
         this.doorProperties.id = doorId;
         this.doorProperties.ipAddress = ipAddress;
         this.doorProperties.port = port;
         this.doorProperties.date = new Date(System.currentTimeMillis());
         this.doorProperties.isOpened = false;
+
+        identity.description = "door-" + doorId;
+    }
+
+    @Override
+    public DataBus getDataBus() {
+        return dataBus;
+    }
+
+    @Override
+    public void setDataBus(DataBus dataBus) {
+        this.dataBus = dataBus;
     }
 
     private Door doorProperties = new Door();
@@ -27,7 +58,24 @@ public class HellaAPCECORS485DataDriver implements DataDriver {
     }
 
     private String sendRequest(String request) throws IOException {
-        DatagramSocket socket = new DatagramSocket(doorProperties.port, InetAddress.getByName(doorProperties.ipAddress));
+        DatagramSocket socket = new DatagramSocket();
+        socket.setBroadcast(true);
+
+        byte[] buffer = request.getBytes();
+
+        DatagramPacket packet = new DatagramPacket(buffer, buffer.length, InetAddress.getByName(doorProperties.ipAddress), doorProperties.port);
+        socket.send(packet);
+
+        System.out.println("Mensaje enviado al Hella:\n" + request);
+
+        DatagramPacket receivingData = new DatagramPacket(new byte[100], 100);
+
+        socket.receive(receivingData);
+
+        socket.close();
+
+
+        /*DatagramSocket socket = new DatagramSocket(doorProperties.port, InetAddress.getByName(doorProperties.ipAddress));
 
         DatagramPacket sendingData = new DatagramPacket(request.getBytes(), request.length(), InetAddress.getByName(doorProperties.ipAddress), doorProperties.port);
 
@@ -35,64 +83,131 @@ public class HellaAPCECORS485DataDriver implements DataDriver {
 
         DatagramPacket receivingData = new DatagramPacket(new byte[100], 100);
 
-        socket.close();
+        socket.receive(receivingData);
 
-        return receivingData.toString();
+        socket.close();*/
+
+        String messageReceived = new String(receivingData.getData());
+
+        System.out.println("Mensaje recibido del Hella:\n" + messageReceived);
+
+        return messageReceived;
     }
 
     @Override
-    public Map<String, String> getData() throws Exception {
-        //Consultamos el estado de la puerta 'VDV2bW'
-        String doorState = sendRequest("VDV2bW"+doorProperties.id);
+    public void startProduction() throws Exception {
 
-        doorState = doorState.replace("VDV2bW","");
+        Thread thread = new Thread(this);
+        thread.start();
 
-        //Si esta cerrada, es decir, = 1
-        if (doorState.equals("1")){
-            //  Actualizamos el estado de la puerta a cerrado
-            doorProperties.isOpened = false;
-            //  Consultamos la cantidad de entradas y salidas 'VDV2bE'
-            Map<String, String> extendedData = getExtendedData();
+    }
 
-            int inPassengers = Integer.parseInt(extendedData.get("inPassengers"));
-            int outPassengers = Integer.parseInt(extendedData.get("outPassengers"));
+    @Override
+    public void run() {
 
+        while (true){
 
+            try {
+                //Si esta cerrada, es decir, = 1
+                DoorState doorState = getDoorState();
+                System.out.println("El estado de la puerta es: " + doorState);
+                if (doorState == DoorState.DOOR_CLOSED){
 
-            long duration =  (Math.abs(new Date(System.currentTimeMillis()).getTime() - doorProperties.date.getTime())/1000);
+                    System.out.println("La puerta está cerrada");
+                    //  Actualizamos el estado de la puerta a cerrado
+                    doorProperties.isOpened = false;
+                    //  Consultamos la cantidad de entradas y salidas 'VDV2bE'
+                    Map<String, String> extendedData = getExtendedData();
+                    System.out.println("Los datos se han extraido " + extendedData.toString());
 
-            //  Verificamos si hay datos disponibles. Si passengersIn o passengerOut son mayor que 0 y la fecha es diferente de 0
-            if ((inPassengers > 0 || outPassengers > 0) && duration != 0){
-                //      Se resetea el contador 'VDV2bF' + id
-                sendRequest("VDV2bF" + doorProperties.id);
-                //      Si se resetea bien
-                //          la fecha se setea en 0
-                doorProperties.date = new Date(0);
-                //      Si no
-                //          Se notifica el error
-                //  Si no hay datos disponibles
+                    int inPassengers = Integer.parseInt(extendedData.get("inPassengers"));
+                    int outPassengers = Integer.parseInt(extendedData.get("outPassengers"));
 
-                extendedData.put("doorId",String.valueOf(doorProperties.id));
-                extendedData.put("duration", String.valueOf(duration));
-                return extendedData;
-            } else {
-                throw new Exception("There is no data in the door " + doorProperties.id);
+                    long duration =  (Math.abs(new Date(System.currentTimeMillis()).getTime() - doorProperties.date.getTime())/1000);
+
+                    //  Verificamos si hay datos disponibles. Si passengersIn o passengerOut son mayor que 0 y la fecha es diferente de 0
+                    if ((inPassengers > 0 || outPassengers > 0) && duration != 0){
+                        //      Se resetea el contador 'VDV2bF' + id
+                        resetCounter();
+                        System.out.println("El contador se ha reseteado");
+                        //      Si se resetea bien
+                        //          la fecha se setea en 0
+                        doorProperties.date = new Date(0);
+                        //      Si no
+                        //          Se notifica el error
+                        //  Si no hay datos disponibles
+
+                        extendedData.put("doorId",String.valueOf(doorProperties.id));
+                        extendedData.put("duration", String.valueOf(duration));
+
+                        //Se coloca la identidad
+                        putIdentityToData(extendedData);
+
+                        System.out.println(extendedData);
+
+                        getDataBus().publishData(this.getClass(), extendedData);
+                    } else {
+                        throw new Exception("There is no data in the door " + doorProperties.id);
+                    }
+                    //      Notificamos el error
+                    //Si la puerta está abierta, es decir, = 0
+                } else if (doorState == DoorState.DOOR_OPENED){
+                    //  Notificamos que está abierta
+                    System.out.println("Door " + doorProperties.id + "is opened");
+                    //  Actualizamos el estado de la puerta a abierto
+                    if (!doorProperties.isOpened) doorProperties.date = new Date(System.currentTimeMillis());
+                    doorProperties.isOpened = true;
+
+                    //Si el estado de la puerta es desconocido
+                } else {
+                    //  Notificamos que es desconocido
+                    throw new Exception("The state of door " + doorProperties.id + " is unknown: " + doorState);
+                }
+            } catch (Exception e){
+                e.printStackTrace();
+                System.out.println(e.getMessage());
             }
-            //      Notificamos el error
-            //Si la puerta está abierta, es decir, = 0
-        } else if (doorState.equals("0")){
-            //  Notificamos que está abierta
-            System.out.println("Door " + doorProperties.id + "is opened");
-            //  Actualizamos el estado de la puerta a abierto
-            if (!doorProperties.isOpened) doorProperties.date = new Date(System.currentTimeMillis());
-            doorProperties.isOpened = true;
 
-            //Si el estado de la puerta es desconocido
-        } else {
-            //  Notificamos que es desconocido
-            throw new Exception("The state of door " + doorProperties.id + " is unknown");
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
-        return null;
+
+
+    }
+
+    private void putIdentityToData(Map<String,String> data){
+        data.put("brand", identity.brand);
+        data.put("model", identity.model);
+        data.put("serial", identity.serial);
+        data.put("data-scheme",identity.dataScheme);
+        data.put("controller-version", identity.controllerVersion);
+    }
+
+    private String resetCounter() throws Exception{
+        return sendRequest("VDV2bF" + doorProperties.id);
+    }
+
+
+    private DoorState getDoorState() throws Exception{
+        char doorState = sendRequest("VDV2bW"+doorProperties.id).charAt(6);
+
+        System.out.println("Entrada en bytes: " + doorState);
+
+        System.out.println("0".getBytes(StandardCharsets.US_ASCII));
+
+        System.out.println("El valor convertido es " + doorState);
+
+        switch (doorState){
+            case '0':
+                return DoorState.DOOR_OPENED;
+            case '1':
+                return DoorState.DOOR_CLOSED;
+            default:
+                return DoorState.DOOR_UNKNOWN;
+        }
     }
 
     public Map<String,String> getInOutPassengersCount() throws IOException {
@@ -238,5 +353,55 @@ public class HellaAPCECORS485DataDriver implements DataDriver {
             default:
                 return "qualifierNotIdentified";
         }
+    }
+
+    @Override
+    public void setBrand(String brandName) {
+        identity.brand = brandName;
+    }
+
+    @Override
+    public String getBrand() {
+        return identity.brand;
+    }
+
+    @Override
+    public void setModel(String modelName) {
+        identity.model = modelName;
+    }
+
+    @Override
+    public String getModel() {
+        return identity.model;
+    }
+
+    @Override
+    public void setSerial(String serial) {
+        identity.serial = serial;
+    }
+
+    @Override
+    public String getSerial() {
+        return identity.serial;
+    }
+
+    @Override
+    public void setDataScheme(String dataScheme) {
+        identity.dataScheme = dataScheme;
+    }
+
+    @Override
+    public String getDataScheme() {
+        return identity.dataScheme;
+    }
+
+    @Override
+    public void setControllerVersion(String controllerVersion) {
+        identity.controllerVersion = controllerVersion;
+    }
+
+    @Override
+    public String getControllerVersion() {
+        return identity.controllerVersion;
     }
 }

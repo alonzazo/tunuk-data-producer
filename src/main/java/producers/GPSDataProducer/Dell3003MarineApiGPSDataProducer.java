@@ -1,24 +1,30 @@
-package drivers.GPSDataDriver;
-
-import drivers.DataDriver;
+package producers.GPSDataProducer;
 
 import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
+import net.sf.marineapi.nmea.event.SentenceEvent;
+import net.sf.marineapi.nmea.event.SentenceListener;
+import net.sf.marineapi.nmea.io.SentenceReader;
+import net.sf.marineapi.nmea.sentence.SentenceValidator;
+import producers.DataProducer;
+import utils.DataBus;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Enumeration;
 
-import net.sf.marineapi.nmea.event.SentenceEvent;
-import net.sf.marineapi.nmea.event.SentenceListener;
-import net.sf.marineapi.nmea.io.SentenceReader;
-import net.sf.marineapi.nmea.sentence.SentenceValidator;
+public class Dell3003MarineApiGPSDataProducer implements DataProducer, SentenceListener {
+    @Override
+    public DataBus getDataBus() {
+        return null;
+    }
 
-import java.util.Map;
+    @Override
+    public void setDataBus(DataBus dataBus) {
 
-public class Dell3003MarineApiGPSDataDriver implements DataDriver, SentenceListener {
+    }
+
     @Override
     public void readingPaused() {
         System.out.println("-- Paused --");
@@ -42,9 +48,8 @@ public class Dell3003MarineApiGPSDataDriver implements DataDriver, SentenceListe
     }
 
     @Override
-    public Map<String, String> getData() throws Exception {
+    public void startProduction() throws Exception {
         init();
-        return null;
     }
 
     /**
@@ -64,7 +69,7 @@ public class Dell3003MarineApiGPSDataDriver implements DataDriver, SentenceListe
 
                     SerialPort sp = (SerialPort) id.open("SerialExample", 30);
 
-                    sp.setSerialPortParams(4800, SerialPort.DATABITS_8,
+                    sp.setSerialPortParams(9600, SerialPort.DATABITS_8,
                             SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
                     sp.enableReceiveTimeout(1000);
                     sp.enableReceiveThreshold(0);
@@ -120,5 +125,53 @@ public class Dell3003MarineApiGPSDataDriver implements DataDriver, SentenceListe
         }
     }
 
+    @Override
+    public void setBrand(String brandName) {
 
+    }
+
+    @Override
+    public String getBrand() {
+        return null;
+    }
+
+    @Override
+    public void setModel(String modelName) {
+
+    }
+
+    @Override
+    public String getModel() {
+        return null;
+    }
+
+    @Override
+    public void setSerial(String serial) {
+
+    }
+
+    @Override
+    public String getSerial() {
+        return null;
+    }
+
+    @Override
+    public void setDataScheme(String dataScheme) {
+
+    }
+
+    @Override
+    public String getDataScheme() {
+        return null;
+    }
+
+    @Override
+    public void setControllerVersion(String controllerVersion) {
+
+    }
+
+    @Override
+    public String getControllerVersion() {
+        return null;
+    }
 }

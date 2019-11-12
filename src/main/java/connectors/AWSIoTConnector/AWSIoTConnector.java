@@ -1,12 +1,12 @@
-package drivers.AWSIoTConnector;
+package connectors.AWSIoTConnector;
 
-import drivers.IoTConnector;
-import utils.SampleUtil;
 import com.amazonaws.services.iot.client.AWSIotException;
 import com.amazonaws.services.iot.client.AWSIotMessage;
 import com.amazonaws.services.iot.client.AWSIotMqttClient;
 import com.amazonaws.services.iot.client.AWSIotQos;
-
+import connectors.IoTConnector;
+import connectors.IoTConnectorException;
+import utils.SampleUtil;
 
 import java.io.FileInputStream;
 import java.util.Properties;
@@ -24,7 +24,7 @@ public class AWSIoTConnector implements IoTConnector {
     public AWSIoTConnector(){
         try {
             reset();
-        }catch (AWSIoTConnectorException e){
+        }catch (IoTConnectorException e){
             clientEndpoint = "";
             clientId = "";
             certificateFile = "";
@@ -32,7 +32,7 @@ public class AWSIoTConnector implements IoTConnector {
         }
     }
 
-    public void connect() throws AWSIoTConnectorException {
+    public void connect() throws IoTConnectorException {
         // SampleUtil.java and its dependency PrivateKeyReader.java can be copied from the sample source code.
 // Alternatively, you could load key store directly from a file - see the example included in this README.
         SampleUtil.KeyStorePasswordPair pair = SampleUtil.getKeyStorePasswordPair(certificateFile, privateKeyFile);
@@ -42,17 +42,17 @@ public class AWSIoTConnector implements IoTConnector {
             // optional parameters can be set before connect()
             client.connect();
         } catch (AWSIotException e){
-            throw new AWSIoTConnectorException(e);
+            throw new IoTConnectorException(e);
         }
 
     }
 
-    public void reset() throws AWSIoTConnectorException{
+    public void reset() throws IoTConnectorException {
         configure("props.conf");
     }
 
 
-    public void configure(String propertiesPath) throws AWSIoTConnectorException {
+    public void configure(String propertiesPath) throws IoTConnectorException {
         try {
             FileInputStream fileInputStream = new FileInputStream(propertiesPath);
 
@@ -64,13 +64,13 @@ public class AWSIoTConnector implements IoTConnector {
             certificateFile = properties.getProperty("certificateFile");
             privateKeyFile = properties.getProperty("privateKeyFile");
         }catch (Exception e){
-            throw new AWSIoTConnectorException(e);
+            throw new IoTConnectorException(e);
         }
 
 
     }
 
-    public void publish(String topic, String message) throws AWSIoTConnectorException {
+    public void publish(String topic, String message) throws IoTConnectorException {
         class MyMessage extends AWSIotMessage {
             public MyMessage(String topic, AWSIotQos qos, String payload) {
                 super(topic, qos, payload);
@@ -99,16 +99,16 @@ public class AWSIoTConnector implements IoTConnector {
         try {
             client.publish(myMessage, timeout);
         } catch (AWSIotException e) {
-            throw new AWSIoTConnectorException(e);
+            throw new IoTConnectorException(e);
         }
 
     }
 
-    public void close() throws AWSIoTConnectorException {
+    public void close() throws IoTConnectorException {
         try {
             client.disconnect();
         } catch (AWSIotException e) {
-            throw new AWSIoTConnectorException(e);
+            throw new IoTConnectorException(e);
         }
     }
 }

@@ -1,5 +1,5 @@
 package factories;
 
 public enum IoTConnectorType {
-    AMAZON_WEB_SERVICES
+    AMAZON_WEB_SERVICES,STANDARD_OUTPUT
 }
