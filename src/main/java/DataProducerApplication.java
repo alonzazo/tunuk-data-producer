@@ -52,15 +52,18 @@ public class DataProducerApplication {
             // ---------------------------------------------------------------------------------GATHER DATA FROM SENSORS
 
             // Gather GPS data
-            DataProducer gpsDataProducer = DataProducerFactory.create(DataProducerType.DELL_3003_RXTX, dataBus);
+            /*DataProducer gpsDataProducer = DataProducerFactory.create(DataProducerType.DELL_3003_RXTX, dataBus);
+            gpsDataProducer.startProduction();*/
+
+            DataProducer gpsDataProducer = DataProducerFactory.create(DataProducerType.HONGDIAN_H8922S, dataBus);
             gpsDataProducer.startProduction();
 
 
             // Gather AutomaticPeopleCounter(APC) data
-            DataProducer apcDataProducer1 = DataProducerFactory.create(DataProducerType.Hella_APC_ECO_RS485, dataBus,1,"10.42.1.221",10076);
+            DataProducer apcDataProducer1 = DataProducerFactory.create(DataProducerType.Hella_APC_ECO_RS485, dataBus,1,"192.168.8.221",10076);
             apcDataProducer1.startProduction();
 
-            DataProducer apcDataProducer2 = DataProducerFactory.create(DataProducerType.Hella_APC_ECO_RS485, dataBus,2,"10.42.2.222",10076);
+            DataProducer apcDataProducer2 = DataProducerFactory.create(DataProducerType.Hella_APC_ECO_RS485, dataBus,2,"192.168.8.222",10076);
             apcDataProducer2.startProduction();
 
             // Gather CAN-BUS data

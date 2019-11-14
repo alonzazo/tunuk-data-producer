@@ -95,7 +95,9 @@ public class AWSIoTConnector implements IoTConnector {
         AWSIotQos qos = AWSIotQos.QOS0;
         long timeout = 3000;                    // milliseconds
 
+        System.out.println("Mensaje por enviarse: " + message);
         MyMessage myMessage = new MyMessage(topic, qos, message);
+
         try {
             client.publish(myMessage, timeout);
         } catch (AWSIotException e) {
