@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,12 +27,13 @@ public class HellaAPCECORS485DataProducer implements DataProducer, Runnable {
     }
     private DataProducerIdentity identity = new DataProducerIdentity();
 
-    public HellaAPCECORS485DataProducer(int doorId, String ipAddress, int port) {
+    public HellaAPCECORS485DataProducer(int doorId, String ipAddress, int port, DataBus databus) {
         this.doorProperties.id = doorId;
         this.doorProperties.ipAddress = ipAddress;
         this.doorProperties.port = port;
         this.doorProperties.date = new Date(System.currentTimeMillis());
         this.doorProperties.isOpened = false;
+        this.dataBus = databus;
 
         identity.description = "door-" + doorId;
     }
@@ -73,19 +73,6 @@ public class HellaAPCECORS485DataProducer implements DataProducer, Runnable {
         socket.receive(receivingData);
 
         socket.close();
-
-
-        /*DatagramSocket socket = new DatagramSocket(doorProperties.port, InetAddress.getByName(doorProperties.ipAddress));
-
-        DatagramPacket sendingData = new DatagramPacket(request.getBytes(), request.length(), InetAddress.getByName(doorProperties.ipAddress), doorProperties.port);
-
-        socket.send(sendingData);
-
-        DatagramPacket receivingData = new DatagramPacket(new byte[100], 100);
-
-        socket.receive(receivingData);
-
-        socket.close();*/
 
         String messageReceived = new String(receivingData.getData());
 
@@ -194,12 +181,6 @@ public class HellaAPCECORS485DataProducer implements DataProducer, Runnable {
     private DoorState getDoorState() throws Exception{
         char doorState = sendRequest("VDV2bW"+doorProperties.id).charAt(6);
 
-        System.out.println("Entrada en bytes: " + doorState);
-
-        System.out.println("0".getBytes(StandardCharsets.US_ASCII));
-
-        System.out.println("El valor convertido es " + doorState);
-
         switch (doorState){
             case '0':
                 return DoorState.DOOR_OPENED;
@@ -301,7 +282,8 @@ public class HellaAPCECORS485DataProducer implements DataProducer, Runnable {
                 currentValue = "";
             }
             else
-                currentValue += currentCharacter;
+                if (currentCharacter.matches("[0-9:;<=>?]"))
+                    currentValue += currentCharacter;
         }
         qualifierValueMap.put(currentQualifier,currentValue);
         return qualifierValueMap;

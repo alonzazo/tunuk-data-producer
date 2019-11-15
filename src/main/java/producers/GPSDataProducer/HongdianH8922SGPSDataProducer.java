@@ -1,39 +1,37 @@
 package producers.GPSDataProducer;
 
-import jssc.SerialPort;
-import jssc.SerialPortEvent;
-import jssc.SerialPortEventListener;
-import jssc.SerialPortException;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.GGASentence;
 import net.sf.marineapi.nmea.sentence.GLLSentence;
+import net.sf.marineapi.nmea.sentence.RMCSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.util.Position;
 import producers.DataProducer;
 import utils.DataBus;
 
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Dell3003RxtxGPSDataProducer implements DataProducer, SerialPortEventListener {
+public class HongdianH8922SGPSDataProducer implements DataProducer, Runnable {
 
-
-    private SerialPort serialPort;
-    private String residualStream = "";
+    private int port;
     private DataBus dataBus;
 
     private static class DataProducerIdentity {
-        String brand = "Dell",
-                model= "3003",
+        String brand = "Hongdian",
+                model= "H8922S",
                 serial="",
                 dataScheme="GPS",
                 controllerVersion="1.0";
     }
     private DataProducerIdentity identity = new DataProducerIdentity();
 
-    public Dell3003RxtxGPSDataProducer(DataBus dataBus) {
+    public HongdianH8922SGPSDataProducer(int port, DataBus dataBus) {
         this.dataBus = dataBus;
+        this.port = port;
     }
 
     @Override
@@ -99,46 +97,27 @@ public class Dell3003RxtxGPSDataProducer implements DataProducer, SerialPortEven
     @Override
     public void startProduction() throws Exception {
 
-        serialPort = new SerialPort("/dev/ttyHS0");
-        System.out.println("Port opened: " + serialPort.openPort());
-        System.out.println("Params setted: " + serialPort.setParams(9600, 8, 1, 0));//Set params.
-        serialPort.addEventListener(this);//Add SerialPortEventListener
+        Thread thread = new Thread(this);
+        thread.start();
 
     }
 
     @Override
-    public void serialEvent(SerialPortEvent serialPortEvent) {
-        try {
-            byte[] bytes = serialPort.readBytes();
+    public void run() {
+        while (true){
+            try {
+                String incomingString = receiveGPSData();
 
-            if (bytes != null){
-                String incomingString = new String(bytes,StandardCharsets.UTF_8);
-
-                System.out.println("ENTRADA DEL GPS CRUDA:\n" + incomingString);
-
-                if (incomingString.charAt(0) == '$')
-                    residualStream += "\r\n";
-
-                residualStream += incomingString;
-
-                String[] lines = residualStream.split("\r\n");
-
-                /*String[] lines = incomingString.split("\r\n");*/
-
-                residualStream = lines[lines.length-1];
 
                 Map<String,String> gpsData = new HashMap<>();
 
                 //Componemos los datos del GPS
-
                 System.out.println("***********************INTERPRETACION COMENZADA**********************");
-                for (int i = 0; i < lines.length - 1; i++){
-                    //gpsData.putAll(parseNMEASentence("$GPGGA,224900.000,4832.3762,N,00903.5393,E,1,04,7.8,498.6,M,48.0,M,,0000*5E"));
-                    Map<String, String> lineParsed = parseNMEASentence(lines[i]);
-                    if (lineParsed.size() != 0){
-                        gpsData.putAll(lineParsed);
-                        System.out.println("-----------------------------------INTERPRETACION CORRECTA\nLÍNEA CRUDA GPS: \n" + lines[i] + "\nLÍNEA INTERPRETADA GPS:\n" + lineParsed.toString() + "\n----------------------------------");
-                    }
+
+                Map<String, String> lineParsed = parseNMEASentence(incomingString);
+                if (lineParsed.size() != 0){
+                    gpsData.putAll(lineParsed);
+                    System.out.println("-----------------------------------INTERPRETACION CORRECTA\nLÍNEA CRUDA GPS: \n" + incomingString + "\nLÍNEA INTERPRETADA GPS:\n" + lineParsed.toString() + "\n----------------------------------");
                 }
 
                 if (gpsData.size() != 0){
@@ -151,11 +130,36 @@ public class Dell3003RxtxGPSDataProducer implements DataProducer, SerialPortEven
                 }
                 System.out.println("******************INTERPRETACION FINALIZADA**************************");
             }
-        }
 
-        catch (SerialPortException ex) {
-            System.out.println(ex.getMessage());
+            catch (Exception ex) {
+                System.out.println(ex.getMessage());
+            }
+
+            try {
+                Thread.sleep(1000);
+            } catch (Exception ignored){ }
         }
+    }
+
+    private String receiveGPSData() throws IOException {
+        DatagramSocket socket = new DatagramSocket(this.port);
+        socket.setBroadcast(true);
+
+        DatagramPacket receivingData = new DatagramPacket(new byte[100],100);
+
+        socket.receive(receivingData);
+
+        socket.close();
+
+        byte[] data = new byte[receivingData.getLength()];
+
+        System.arraycopy(receivingData.getData(), receivingData.getOffset(), data, 0, receivingData.getLength());
+
+        String messageReceived = new String(data);
+
+        System.out.println("Mensaje recibido del H8922S:\n" + messageReceived);
+
+        return messageReceived;
     }
 
     private void putIdentityToData(Map<String,String> data){
@@ -191,12 +195,39 @@ public class Dell3003RxtxGPSDataProducer implements DataProducer, SerialPortEven
                 result.put("latitude", String.valueOf(position.getLatitude()));
                 result.put("longitude", String.valueOf(position.getLongitude()));
                 result.put("altitude", String.valueOf(position.getAltitude()));
-            } else {
+            } else if (sentence instanceof RMCSentence){
+                System.out.println(line + " -> RMC ENCONTRADA");
+                RMCSentence rmcSentence = (RMCSentence) sentence;
+                Position position = rmcSentence.getPosition();
+
+                try {
+                    result.put("status", String.valueOf(rmcSentence.getStatus().toChar()));
+                } catch (Exception ignored){}
+                try {
+                    result.put("speed",String.valueOf(rmcSentence.getSpeed()));
+                } catch (Exception ignored){}
+                try {
+                    result.put("trackAngle", String.valueOf(rmcSentence.getCourse()));
+                } catch (Exception ignored){}
+                try {
+                    result.put("magneticVariation", String.valueOf(rmcSentence.getVariation()));
+                } catch (Exception ignored){}
+                try {
+                    result.put("latitude", String.valueOf(position.getLatitude()));
+                } catch (Exception ignored){}
+                try {
+                    result.put("longitude", String.valueOf(position.getLongitude()));
+                } catch (Exception ignored){}
+                try {
+                    result.put("altitude", String.valueOf(position.getAltitude()));
+                } catch (Exception ignored){}
+            }
+            else {
                 System.out.println(line + " -> FORMATO NO IDENTIFICADO");
             }
 
         } catch (Exception ignored){
-            //ignored.printStackTrace();
+            ignored.printStackTrace();
             System.out.println(ignored.getMessage());
         }
         return result;
