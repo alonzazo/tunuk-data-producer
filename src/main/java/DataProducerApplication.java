@@ -31,8 +31,8 @@ public class DataProducerApplication {
             }else {
                 identity = loadFileProperties("configurations/identity.properties");
             }
-            // ------------------------------------------------------------------------------------- CONFIGURE IOTSERVER
 
+            // ------------------------------------------------------------------------------------- CONFIGURE IOTSERVER
             IoTConnector ioTConnector;
             if (argList.contains("--stdout")){
                 ioTConnector = IoTConnectorFactory.create(IoTConnectorType.STANDARD_OUTPUT);

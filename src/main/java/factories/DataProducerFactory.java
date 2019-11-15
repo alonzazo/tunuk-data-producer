@@ -17,8 +17,7 @@ public class DataProducerFactory {
 
     private static DataProducer createDell3003rxtxGPSDataProducer(DataBus dataBus){return new Dell3003RxtxGPSDataProducer(dataBus);}
 
-    private static DataProducer createHongdianH8922SGPSDataProducer(int port, DataBus dataBus){ return new HongdianH8922SGPSDataProducer(port, dataBus);
-    }
+    private static DataProducer createHongdianH8922SGPSDataProducer(int port, DataBus dataBus){ return new HongdianH8922SGPSDataProducer(port, dataBus); }
 
     private static DataProducer createHellaAPCProducer(int doorId, String ipAddress, int port, DataBus dataBus){return new HellaAPCECORS485DataProducer(doorId, ipAddress, port, dataBus); }
 

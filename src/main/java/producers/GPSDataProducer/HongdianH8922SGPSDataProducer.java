@@ -18,7 +18,6 @@ import java.util.Map;
 public class HongdianH8922SGPSDataProducer implements DataProducer, Runnable {
 
     private int port;
-    private String residualStream = "";
     private DataBus dataBus;
 
     private static class DataProducerIdentity {

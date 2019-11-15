@@ -1,7 +1,11 @@
+import javafx.util.Pair;
 import producers.DataProducer;
 import producers.GPSDataProducer.Dell3003RxtxGPSDataProducer;
 import producers.GPSDataProducer.HongdianH8922SGPSDataProducer;
 import utils.SyncronizedDataBus;
+
+import java.io.FileReader;
+import java.util.*;
 
 public class UnitTests {
 
@@ -38,6 +42,41 @@ public class UnitTests {
 
     }
 
+    private static void configurationProps() throws Exception{
+        System.out.println(System.getProperty("user.dir"));
+        FileReader fileReader = new FileReader("src/main/resources/configurations/producers-config.properties");
+
+        Scanner scanner = new Scanner(fileReader);
+
+        List<Pair<String, Properties>> producersList = new LinkedList<>();
+        int LINES_LIMIT = 100;
+
+        Properties currentProperties = new Properties();
+        String currentControllerName = "";
+
+        for (int i = 0; scanner.hasNext() && i < LINES_LIMIT; i++){
+            String line = scanner.next();
+
+            if (line.matches("[^=]+=[^=]*")){
+                String[] keyValue = line.split("=");
+                currentProperties.put( keyValue[0].trim(), keyValue[1].trim() );
+
+                if (i == LINES_LIMIT - 1 || !scanner.hasNext()){
+                    producersList.add(new Pair<>(currentControllerName,currentProperties));
+                }
+            }
+            else if (!line.trim().equals("")){
+                if (!currentControllerName.equals("")){
+                    producersList.add(new Pair<>(currentControllerName,currentProperties));
+                    currentProperties = new Properties();
+                }
+                currentControllerName = line.trim();
+            }
+        }
+
+        System.out.println(producersList);
+    }
+
     public static void main(String args[]){
         try {
 
@@ -45,7 +84,9 @@ public class UnitTests {
 
             /*parseSentence();*/
 
-            H8922STest();
+            /*H8922STest();*/
+
+            configurationProps();
 
             /*List<Map<String,String>> list = new LinkedList<>();
 
