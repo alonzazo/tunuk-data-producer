@@ -10,7 +10,7 @@ import net.sf.marineapi.nmea.sentence.GLLSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.util.Position;
 import producers.DataProducer;
-import utils.DataBus;
+import utils.EventBus;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -22,7 +22,7 @@ public class Dell3003RxtxGPSDataProducer implements DataProducer, SerialPortEven
     private SerialPort serialPort;
     private String serialPortName;
     private String residualStream = "";
-    private DataBus dataBus;
+    private EventBus EventBus;
 
     private static class DataProducerIdentity {
         String brand = "Dell",
@@ -33,8 +33,8 @@ public class Dell3003RxtxGPSDataProducer implements DataProducer, SerialPortEven
     }
     private DataProducerIdentity identity = new DataProducerIdentity();
 
-    public Dell3003RxtxGPSDataProducer(String serialPortName, DataBus dataBus) {
-        this.dataBus = dataBus; this.serialPortName = serialPortName;
+    public Dell3003RxtxGPSDataProducer(String serialPortName, EventBus EventBus) {
+        this.EventBus = EventBus; this.serialPortName = serialPortName;
     }
 
     @Override
@@ -88,13 +88,13 @@ public class Dell3003RxtxGPSDataProducer implements DataProducer, SerialPortEven
     }
 
     @Override
-    public DataBus getDataBus() {
-        return dataBus;
+    public EventBus getEventBus() {
+        return EventBus;
     }
 
     @Override
-    public void setDataBus(DataBus dataBus) {
-        this.dataBus = dataBus;
+    public void setEventBus(EventBus EventBus) {
+        this.EventBus = EventBus;
     }
 
     @Override
@@ -146,9 +146,9 @@ public class Dell3003RxtxGPSDataProducer implements DataProducer, SerialPortEven
                     //Agregamos la identidad
                     putIdentityToData(gpsData);
                     // Publicamos los datos en el bus de datos
-                    dataBus.publishData(this.getClass(), gpsData);
+                    EventBus.publishData(this.getClass(), gpsData);
                 } else {
-                    System.out.println("No se agregó datos GPS al dataBus");
+                    System.out.println("No se agregó datos GPS al EventBus");
                 }
                 System.out.println("******************INTERPRETACION FINALIZADA**************************");
             }

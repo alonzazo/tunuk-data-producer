@@ -2,13 +2,13 @@ package factories.dataproducersfactories;
 
 import producers.DataProducer;
 import producers.GPSDataProducer.Dell3003ArcGISGPSDataProducer;
-import utils.DataBus;
+import utils.EventBus;
 
 import java.util.Properties;
 
 public class Dell3003ArcGISGPSDataProducerFactory implements DataProducerFactory {
     @Override
-    public DataProducer create(Properties properties, DataBus dataBus) throws DataProducerPropertyNotDefinedException {
+    public DataProducer create(Properties properties, EventBus EventBus) throws DataProducerPropertyNotDefinedException {
 
         String port;
 
@@ -20,7 +20,7 @@ public class Dell3003ArcGISGPSDataProducerFactory implements DataProducerFactory
     }
 
     @Override
-    public DataProducer create(DataBus dataBus) {
+    public DataProducer create(EventBus EventBus) {
         return new Dell3003ArcGISGPSDataProducer("/dev/ttyS0");
     }
 

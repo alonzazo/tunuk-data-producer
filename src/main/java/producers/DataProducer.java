@@ -1,6 +1,6 @@
 package producers;
 
-import utils.DataBus;
+import utils.EventBus;
 
 public interface DataProducer {
 
@@ -15,8 +15,8 @@ public interface DataProducer {
     void setControllerVersion(String controllerVersion);
     String getControllerVersion();
 
-    DataBus getDataBus();
-    void setDataBus(DataBus dataBus);
+    EventBus getEventBus();
+    void setEventBus(EventBus eventBus);
     void startProduction() throws Exception;
 
 }

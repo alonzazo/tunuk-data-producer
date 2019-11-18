@@ -1,16 +1,15 @@
 import absfactories.DataProducerAbsFactory;
+import absfactories.EventBusAbsFactory;
 import connectors.IoTConnector;
-import consumers.DataBusPublisher;
 import consumers.IoTDataBusPublisher;
-import factories.DataBusFactory;
-import factories.DataBusType;
-import factories.IoTConnectorFactory;
-import factories.IoTConnectorType;
+import consumers.Subscriber;
+import factories.*;
 import javafx.util.Pair;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONObject;
 import producers.DataProducer;
 import utils.DataBus;
+import utils.EventBus;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -28,7 +27,7 @@ public class DataProducerApplication {
         try {
 
             List<String> argList = Arrays.asList(args);
-            DataBus dataBus = DataBusFactory.create(DataBusType.SYNCRONIZED);
+            /*DataBus dataBus = DataBusFactory.create(DataBusType.SYNCRONIZED);*/
             List<Pair<String, Properties>> producersConfigurations;
 
             // -------------------------------------------------------------------------------------------- INITIALIZING
@@ -63,41 +62,53 @@ public class DataProducerApplication {
             ioTConnector.connect();
             // ---------------------------------------------------------------------------------GATHER DATA FROM SENSORS
 
-            // Gather GPS data
-            /*DataProducer gpsDataProducer = DataProducerFactory.create(DataProducerType.DELL_3003_RXTX, dataBus);
-            gpsDataProducer.startProduction();*/
-
-            /*DataProducer gpsDataProducer = DataProducerFactory.create(DataProducerType.HONGDIAN_H8922S, dataBus);
-            gpsDataProducer.startProduction();*/
-
-
-            // Gather AutomaticPeopleCounter(APC) data
-            /*DataProducer apcDataProducer1 = DataProducerFactory.create(DataProducerType.Hella_APC_ECO_RS485, dataBus,1,"192.168.8.221",10076);
-            apcDataProducer1.startProduction();*/
-
-            /*DataProducer apcDataProducer2 = DataProducerFactory.create(DataProducerType.Hella_APC_ECO_RS485, dataBus,2,"192.168.8.222",10076);
-            apcDataProducer2.startProduction();*/
-
             // Gather CAN-BUS data
-
-
             List<DataProducer> dataProducerList = new LinkedList<>();
+            Map<String,EventBus> dataBusMap = new HashMap<>();
+
             // DataProducers gathering initialization
             for (Pair<String, Properties> producerConfiguration:
                  producersConfigurations) {
                 try {
 
+                    EventBus currentEventBus;
                     // Se revisa qué tipo de databus ocupa el productor
                     // Si es micro batch
-                    //      Se revisa si ya existe uno de ese intervalo tiempo
-                    // Si no es streaming
-                    //      Se asigna el databus de streaming
+                    if (producerConfiguration.getValue().containsKey("databus.mode") &&
+                        producerConfiguration.getValue().getProperty("databus.mode").equals("microbatch")){
+
+                        // Se obtiene el intervalo
+                        Long intervalMilis = 1000L; // Valor default //Cast
+                        if (producerConfiguration.getValue().containsKey( "databus.interval" ))
+                            intervalMilis = Long.valueOf(producerConfiguration.getValue().getProperty("databus.interval"));
+
+                        // Se revisa si ya existe uno de ese intervalo tiempo (en unidades de milisegundos)
+                        if (dataBusMap.containsKey(intervalMilis.toString()))
+                            currentEventBus = dataBusMap.get(intervalMilis.toString());
+                        // Si no, se crea uno nuevo y se asigna como
+                        else {
+                            MicrobatchDataBusFactory microbatchDataBusFactory = (MicrobatchDataBusFactory) EventBusAbsFactory.create(EventBusType.MICROBATCH); //TODO Buscar la forma de no usar casting
+                            currentEventBus = microbatchDataBusFactory.create(intervalMilis);
+                            dataBusMap.put(intervalMilis.toString(), currentEventBus);
+                            ((DataBus) currentEventBus).startPublication();
+                        }
+
+                    } // Si no se asigna como streaming
+                    else {
+                        // Se asigna el databus de streaming
+                        if (dataBusMap.containsKey( "streaming" ))
+                            currentEventBus = dataBusMap.get("streaming");
+                        else {
+                            EventBusFactory streamingDataBusFactory = EventBusAbsFactory.create(EventBusType.STREAMING);
+                            currentEventBus = streamingDataBusFactory.create();
+                            dataBusMap.put( "streaming", currentEventBus );
+                        }
+                    }
 
                     // Se crea el productor de dato y se le asigna el databus
-
                     DataProducer dataProducer = DataProducerAbsFactory
                             .createFactory(producerConfiguration.getKey())
-                            .create(producerConfiguration.getValue(), dataBus);
+                            .create(producerConfiguration.getValue(), currentEventBus);
 
                     // Se inicia la producción
                     dataProducer.startProduction();
@@ -113,17 +124,18 @@ public class DataProducerApplication {
 
             // ---------------------------------------------------------------------------FILTER AND COMPOSE THE MESSAGE
 
-            Function<DataBus,String> composerFunction = (currentDataBus) -> {
+            Function<List<Map<String,String>>,String> composerFunction = (currentDataBus) -> {
                 // Se filtra el dataBus
 
                 // Se compone el mensaje
-                return composeMessage(identity, currentDataBus.consumeMergedData());
+                return composeMessage(identity, currentDataBus);
             };
 
             // ------------------------------------------------------------------------TRANSMIT THE MESSAGE TO IOTSERVER
 
-            DataBusPublisher dataBusPublisher = new IoTDataBusPublisher(dataBus, ioTConnector, "dell3003test", composerFunction);
-            dataBusPublisher.startPublish();
+
+            Subscriber dataBusPublisher = new IoTDataBusPublisher(ioTConnector, "dell3003test", composerFunction);
+            dataBusMap.values().forEach((eventBus) -> eventBus.subscribe(dataBusPublisher));
 
 
             // -----------------------------------------------------------------------------------------CLOSE CONNECTION

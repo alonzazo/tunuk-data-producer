@@ -1,61 +1,38 @@
 package consumers;
 
 import connectors.IoTConnector;
-import utils.DataBus;
 
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
-import static java.lang.Thread.sleep;
+public class IoTDataBusPublisher implements Subscriber {
 
-public class IoTDataBusPublisher implements DataBusPublisher {
-
-    private DataBus dataBus;
     private IoTConnector ioTConnector;
-    private Function<DataBus, String> handlerFunction;
+    private Function<List<Map<String,String>>, String> handlerFunction;
     private String topic;
-    private int sleepTime;
 
-    public IoTDataBusPublisher(DataBus dataBus, IoTConnector ioTConnector, String topic, Function<DataBus, String> handlerFunction) {
-        this.dataBus = dataBus;
+    public IoTDataBusPublisher(IoTConnector ioTConnector, String topic, Function<List<Map<String,String>>, String> handlerFunction) {
         this.ioTConnector = ioTConnector;
         this.handlerFunction = handlerFunction;
         this.topic = topic;
-        sleepTime = 1000;
     }
 
-    public IoTDataBusPublisher(DataBus dataBus, IoTConnector ioTConnector, String topic, Function<DataBus, String> handlerFunction, int sleepTime) {
-        this.dataBus = dataBus;
+    public IoTDataBusPublisher(IoTConnector ioTConnector, String topic, Function<List<Map<String,String>>, String> handlerFunction, int sleepTime) {
         this.ioTConnector = ioTConnector;
         this.handlerFunction = handlerFunction;
         this.topic = topic;
-        this.sleepTime = sleepTime;
     }
 
     @Override
-    public void setDataBus(DataBus dataBus) {
-        this.dataBus = dataBus;
-    }
-
-    @Override
-    public DataBus getDataBus() {
-        return dataBus;
-    }
-
-    @Override
-    public void startPublish() {
-        Thread threadPublisher = new Thread(() -> {
-            try {
-                while (true){
-                    String message = handlerFunction.apply(getDataBus());
-                    ioTConnector.publish(topic,message);
-                    sleep(sleepTime);
-                }
-            } catch (Exception e){
-                System.out.println(e.getMessage());
-                e.printStackTrace();
-            }
-        });
-        threadPublisher.start();
+    public void handleDataBus(List<Map<String, String>> data) {
+        try {
+            String message = handlerFunction.apply(data);
+            ioTConnector.publish(topic,message);
+        } catch (Exception e){
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+        }
     }
 
 }

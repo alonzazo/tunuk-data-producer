@@ -1,20 +1,16 @@
 package factories;
 
 import utils.DataBus;
-import utils.SyncronizedDataBus;
+import utils.MicrobatchDataBus;
 
 public class DataBusFactory {
 
-    public static DataBus create(DataBusType type){
+    public static DataBus create(EventBusType type, long interval){
         switch (type){
-            case SYNCRONIZED:
-                return createDataBusSyncronized();
+            case MICROBATCH:
+                return new MicrobatchDataBus(interval);
             default:
                 return null;
         }
-    }
-
-    private static DataBus createDataBusSyncronized() {
-        return new SyncronizedDataBus();
     }
 }

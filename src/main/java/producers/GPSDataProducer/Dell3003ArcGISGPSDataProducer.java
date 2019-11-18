@@ -2,7 +2,7 @@ package producers.GPSDataProducer;
 
 import com.esri.core.gps.*;
 import producers.DataProducer;
-import utils.DataBus;
+import utils.EventBus;
 
 import java.util.Map;
 
@@ -46,12 +46,12 @@ public class Dell3003ArcGISGPSDataProducer implements DataProducer {
     }
 
     @Override
-    public DataBus getDataBus() {
+    public EventBus getEventBus() {
         return null;
     }
 
     @Override
-    public void setDataBus(DataBus dataBus) {
+    public void setEventBus(EventBus EventBus) {
 
     }
 
