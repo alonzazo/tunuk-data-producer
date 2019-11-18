@@ -10,13 +10,13 @@ import java.util.*;
 public class UnitTests {
 
     private static void dell3003rxtxGPSDataDriver() throws Exception {
-        Dell3003RxtxGPSDataProducer rxtxGPSDataDriver = new Dell3003RxtxGPSDataProducer(new SyncronizedDataBus());
+        Dell3003RxtxGPSDataProducer rxtxGPSDataDriver = new Dell3003RxtxGPSDataProducer("/dev/ttyHS0",new SyncronizedDataBus());
         rxtxGPSDataDriver.startProduction();
     }
 
     private static void parseSentence(){
 
-        Dell3003RxtxGPSDataProducer rxtxGPSDataDriver = new Dell3003RxtxGPSDataProducer(new SyncronizedDataBus());
+        Dell3003RxtxGPSDataProducer rxtxGPSDataDriver = new Dell3003RxtxGPSDataProducer("/dev/ttyHS0",new SyncronizedDataBus());
 
         String result = "";
         result += rxtxGPSDataDriver.parseNMEASentence("$GNGGA,184208.00,,,,,0,00,99.99,,,,,,*7F") + "\n";
@@ -47,9 +47,10 @@ public class UnitTests {
         FileReader fileReader = new FileReader("src/main/resources/configurations/producers-config.properties");
 
         Scanner scanner = new Scanner(fileReader);
+        scanner.useDelimiter("\n");
 
         List<Pair<String, Properties>> producersList = new LinkedList<>();
-        int LINES_LIMIT = 100;
+        int LINES_LIMIT = 1024;
 
         Properties currentProperties = new Properties();
         String currentControllerName = "";
@@ -57,7 +58,10 @@ public class UnitTests {
         for (int i = 0; scanner.hasNext() && i < LINES_LIMIT; i++){
             String line = scanner.next();
 
-            if (line.matches("[^=]+=[^=]*")){
+            if (line.length() > 0 && line.trim().charAt(0) == '#'){
+                continue;
+            }
+            else if (line.matches("[^=]+=[^=]*")){
                 String[] keyValue = line.split("=");
                 currentProperties.put( keyValue[0].trim(), keyValue[1].trim() );
 
