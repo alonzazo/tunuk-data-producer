@@ -1,5 +1,6 @@
-package factories;
+package factories.dataproducersfactories;
 
+import absfactories.DataProducerType;
 import producers.APCDataProducer.HellaAPCECORS485DataProducer;
 import producers.DataProducer;
 import producers.GPSDataProducer.Dell3003ArcGISGPSDataProducer;
@@ -9,13 +10,13 @@ import producers.GPSDataProducer.HongdianH8922SGPSDataProducer;
 import utils.DataBus;
 import utils.SyncronizedDataBus;
 
-public class DataProducerFactory {
+public class DataProducerFactoryOld {
 
     private static DataProducer createDell3003ArcGISGPSDataProducer(){return new Dell3003ArcGISGPSDataProducer("/dev/ttyS0");}
 
     private static DataProducer createDell3003MarineApiGPSConnector(){return new Dell3003MarineApiGPSDataProducer();}
 
-    private static DataProducer createDell3003rxtxGPSDataProducer(DataBus dataBus){return new Dell3003RxtxGPSDataProducer(dataBus);}
+    private static DataProducer createDell3003rxtxGPSDataProducer(DataBus dataBus){return new Dell3003RxtxGPSDataProducer("/dev/ttyHS0", dataBus);}
 
     private static DataProducer createHongdianH8922SGPSDataProducer(int port, DataBus dataBus){ return new HongdianH8922SGPSDataProducer(port, dataBus); }
 
@@ -23,7 +24,7 @@ public class DataProducerFactory {
 
     public static DataProducer create(DataProducerType dataProducerType) throws Exception {
         switch (dataProducerType){
-            case Hella_APC_ECO_RS485:
+            case HELLA_APC_ECO_RS485:
                 System.out.println("Hella APC-ECO-RS485 Connector was created using default settings: doorId: 1, ipAddress: 10.42.1.221, port: 10076, dataBus: new SyncronizedDataBus"); //TODO Create another log console and enhance this pattern to avoid to have lots of creates methods.
                 return createHellaAPCProducer(1, "10.42.1.221", 10076, new SyncronizedDataBus());
             case DELL_3003_ARCGIS:
@@ -39,7 +40,7 @@ public class DataProducerFactory {
 
     public static DataProducer create(DataProducerType dataProducerType, DataBus dataBus) throws Exception {
         switch (dataProducerType){
-            case Hella_APC_ECO_RS485:
+            case HELLA_APC_ECO_RS485:
                 System.out.println("Hella APC-ECO-RS485 Connector was created using default settings: doorId: 1, ipAddress: 10.42.1.221, port: 10076"); //TODO Create another log console and enhance this pattern to avoid to have lots of creates methods.
                 return createHellaAPCProducer(1, "10.42.1.221", 10076, new SyncronizedDataBus());
             case DELL_3003_ARCGIS:
@@ -55,7 +56,7 @@ public class DataProducerFactory {
 
     public static DataProducer create(DataProducerType dataProducerType, DataBus dataBus, int doorId, String ipAddress, int port) throws Exception { //TODO Make an abstract factory to avoid this
         switch (dataProducerType){
-            case Hella_APC_ECO_RS485:
+            case HELLA_APC_ECO_RS485:
                 return createHellaAPCProducer(doorId, ipAddress, port, dataBus);
             case DELL_3003_ARCGIS:
                 return createDell3003ArcGISGPSDataProducer();

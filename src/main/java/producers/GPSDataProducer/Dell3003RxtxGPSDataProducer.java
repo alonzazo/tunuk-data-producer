@@ -20,6 +20,7 @@ public class Dell3003RxtxGPSDataProducer implements DataProducer, SerialPortEven
 
 
     private SerialPort serialPort;
+    private String serialPortName;
     private String residualStream = "";
     private DataBus dataBus;
 
@@ -32,8 +33,8 @@ public class Dell3003RxtxGPSDataProducer implements DataProducer, SerialPortEven
     }
     private DataProducerIdentity identity = new DataProducerIdentity();
 
-    public Dell3003RxtxGPSDataProducer(DataBus dataBus) {
-        this.dataBus = dataBus;
+    public Dell3003RxtxGPSDataProducer(String serialPortName, DataBus dataBus) {
+        this.dataBus = dataBus; this.serialPortName = serialPortName;
     }
 
     @Override
@@ -99,7 +100,7 @@ public class Dell3003RxtxGPSDataProducer implements DataProducer, SerialPortEven
     @Override
     public void startProduction() throws Exception {
 
-        serialPort = new SerialPort("/dev/ttyHS0");
+        serialPort = new SerialPort(serialPortName);
         System.out.println("Port opened: " + serialPort.openPort());
         System.out.println("Params setted: " + serialPort.setParams(9600, 8, 1, 0));//Set params.
         serialPort.addEventListener(this);//Add SerialPortEventListener
