@@ -2,14 +2,14 @@ package factories.dataproducersfactories;
 
 import producers.DataProducer;
 import producers.GPSDataProducer.HongdianH8922SGPSDataProducer;
-import utils.DataBus;
+import utils.EventBus;
 
 import java.util.Properties;
 
 public class HongdianH8922SGPSDataProducerFactory implements DataProducerFactory{
 
     @Override
-    public DataProducer create(Properties properties, DataBus dataBus) throws DataProducerPropertyNotDefinedException {
+    public DataProducer create(Properties properties, EventBus EventBus) throws DataProducerPropertyNotDefinedException {
         // Se definen los valores default
         int port;
 
@@ -20,11 +20,11 @@ public class HongdianH8922SGPSDataProducerFactory implements DataProducerFactory
             throw new DataProducerPropertyNotDefinedException("producer.port");
         }
 
-        return new HongdianH8922SGPSDataProducer(port,dataBus);
+        return new HongdianH8922SGPSDataProducer(port,EventBus);
     }
 
     @Override
-    public DataProducer create(DataBus dataBus) {
-        return new HongdianH8922SGPSDataProducer(2502, dataBus);
+    public DataProducer create(EventBus EventBus) {
+        return new HongdianH8922SGPSDataProducer(2502, EventBus);
     }
 }

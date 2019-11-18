@@ -7,7 +7,7 @@ import net.sf.marineapi.nmea.event.SentenceListener;
 import net.sf.marineapi.nmea.io.SentenceReader;
 import net.sf.marineapi.nmea.sentence.SentenceValidator;
 import producers.DataProducer;
-import utils.DataBus;
+import utils.EventBus;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,12 +16,12 @@ import java.io.InputStreamReader;
 
 public class Dell3003MarineApiGPSDataProducer implements DataProducer, SentenceListener {
     @Override
-    public DataBus getDataBus() {
+    public EventBus getEventBus() {
         return null;
     }
 
     @Override
-    public void setDataBus(DataBus dataBus) {
+    public void setEventBus(EventBus EventBus) {
 
     }
 

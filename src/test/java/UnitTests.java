@@ -2,7 +2,7 @@ import javafx.util.Pair;
 import producers.DataProducer;
 import producers.GPSDataProducer.Dell3003RxtxGPSDataProducer;
 import producers.GPSDataProducer.HongdianH8922SGPSDataProducer;
-import utils.SyncronizedDataBus;
+import utils.StreamingEventBus;
 
 import java.io.FileReader;
 import java.util.*;
@@ -10,13 +10,13 @@ import java.util.*;
 public class UnitTests {
 
     private static void dell3003rxtxGPSDataDriver() throws Exception {
-        Dell3003RxtxGPSDataProducer rxtxGPSDataDriver = new Dell3003RxtxGPSDataProducer("/dev/ttyHS0",new SyncronizedDataBus());
+        Dell3003RxtxGPSDataProducer rxtxGPSDataDriver = new Dell3003RxtxGPSDataProducer("/dev/ttyHS0",new StreamingEventBus());
         rxtxGPSDataDriver.startProduction();
     }
 
     private static void parseSentence(){
 
-        Dell3003RxtxGPSDataProducer rxtxGPSDataDriver = new Dell3003RxtxGPSDataProducer("/dev/ttyHS0",new SyncronizedDataBus());
+        Dell3003RxtxGPSDataProducer rxtxGPSDataDriver = new Dell3003RxtxGPSDataProducer("/dev/ttyHS0",new StreamingEventBus());
 
         String result = "";
         result += rxtxGPSDataDriver.parseNMEASentence("$GNGGA,184208.00,,,,,0,00,99.99,,,,,,*7F") + "\n";
@@ -37,7 +37,7 @@ public class UnitTests {
 
     private static void H8922STest() throws Exception {
 
-        DataProducer gpsData = new HongdianH8922SGPSDataProducer(2502, new SyncronizedDataBus());
+        DataProducer gpsData = new HongdianH8922SGPSDataProducer(2502, new StreamingEventBus());
         gpsData.startProduction();
 
     }

@@ -7,7 +7,7 @@ import net.sf.marineapi.nmea.sentence.RMCSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.util.Position;
 import producers.DataProducer;
-import utils.DataBus;
+import utils.EventBus;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -18,7 +18,7 @@ import java.util.Map;
 public class HongdianH8922SGPSDataProducer implements DataProducer, Runnable {
 
     private int port;
-    private DataBus dataBus;
+    private EventBus EventBus;
 
     private static class DataProducerIdentity {
         String brand = "Hongdian",
@@ -29,8 +29,8 @@ public class HongdianH8922SGPSDataProducer implements DataProducer, Runnable {
     }
     private DataProducerIdentity identity = new DataProducerIdentity();
 
-    public HongdianH8922SGPSDataProducer(int port, DataBus dataBus) {
-        this.dataBus = dataBus;
+    public HongdianH8922SGPSDataProducer(int port, EventBus eventBus) {
+        this.EventBus = eventBus;
         this.port = port;
     }
 
@@ -85,13 +85,13 @@ public class HongdianH8922SGPSDataProducer implements DataProducer, Runnable {
     }
 
     @Override
-    public DataBus getDataBus() {
-        return dataBus;
+    public EventBus getEventBus() {
+        return EventBus;
     }
 
     @Override
-    public void setDataBus(DataBus dataBus) {
-        this.dataBus = dataBus;
+    public void setEventBus(EventBus EventBus) {
+        this.EventBus = EventBus;
     }
 
     @Override
@@ -124,9 +124,9 @@ public class HongdianH8922SGPSDataProducer implements DataProducer, Runnable {
                     //Agregamos la identidad
                     putIdentityToData(gpsData);
                     // Publicamos los datos en el bus de datos
-                    dataBus.publishData(this.getClass(), gpsData);
+                    EventBus.publishData(this.getClass(), gpsData);
                 } else {
-                    System.out.println("No se agregó datos GPS al dataBus");
+                    System.out.println("No se agregó datos GPS al EventBus");
                 }
                 System.out.println("******************INTERPRETACION FINALIZADA**************************");
             }

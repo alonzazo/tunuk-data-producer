@@ -2,13 +2,13 @@ package factories.dataproducersfactories;
 
 import producers.APCDataProducer.HellaAPCECORS485DataProducer;
 import producers.DataProducer;
-import utils.DataBus;
+import utils.EventBus;
 
 import java.util.Properties;
 
 public class HellaAPCECORS485DataProducerFactory implements DataProducerFactory {
     @Override
-    public DataProducer create(Properties properties, DataBus dataBus) throws DataProducerPropertyNotDefinedException {
+    public DataProducer create(Properties properties, EventBus eventBus) throws DataProducerPropertyNotDefinedException {
         // Se definen valores default
         int doorId;
         String ipAddress;
@@ -30,11 +30,11 @@ public class HellaAPCECORS485DataProducerFactory implements DataProducerFactory 
         else
             throw new DataProducerPropertyNotDefinedException("producer.port");
 
-        return new HellaAPCECORS485DataProducer(doorId, ipAddress, port, dataBus);
+        return new HellaAPCECORS485DataProducer(doorId, ipAddress, port, eventBus);
     }
 
     @Override
-    public DataProducer create(DataBus dataBus) {
-        return new HellaAPCECORS485DataProducer(1, "10.42.1.221", 10076, dataBus);
+    public DataProducer create(EventBus EventBus) {
+        return new HellaAPCECORS485DataProducer(1, "10.42.1.221", 10076, EventBus);
     }
 }

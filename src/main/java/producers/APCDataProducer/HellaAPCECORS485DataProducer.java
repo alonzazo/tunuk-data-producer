@@ -1,7 +1,7 @@
 package producers.APCDataProducer;
 
 import producers.DataProducer;
-import utils.DataBus;
+import utils.EventBus;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -15,7 +15,7 @@ public class HellaAPCECORS485DataProducer implements DataProducer, Runnable {
 
     private enum DoorState {DOOR_OPENED, DOOR_CLOSED, DOOR_UNKNOWN};
 
-    private DataBus dataBus;
+    private EventBus eventBus;
 
     private static class DataProducerIdentity {
         String brand = "Hella",
@@ -27,25 +27,26 @@ public class HellaAPCECORS485DataProducer implements DataProducer, Runnable {
     }
     private DataProducerIdentity identity = new DataProducerIdentity();
 
-    public HellaAPCECORS485DataProducer(int doorId, String ipAddress, int port, DataBus databus) {
+    public HellaAPCECORS485DataProducer(int doorId, String ipAddress, int port, EventBus eventbus) {
         this.doorProperties.id = doorId;
         this.doorProperties.ipAddress = ipAddress;
         this.doorProperties.port = port;
         this.doorProperties.date = new Date(System.currentTimeMillis());
         this.doorProperties.isOpened = false;
-        this.dataBus = databus;
+        this.eventBus = eventbus;
 
         identity.description = "door-" + doorId;
     }
 
+
     @Override
-    public DataBus getDataBus() {
-        return dataBus;
+    public void setEventBus(EventBus eventBus) {
+        this.eventBus = eventBus;
     }
 
     @Override
-    public void setDataBus(DataBus dataBus) {
-        this.dataBus = dataBus;
+    public EventBus getEventBus() {
+        return eventBus;
     }
 
     private Door doorProperties = new Door();
@@ -132,7 +133,7 @@ public class HellaAPCECORS485DataProducer implements DataProducer, Runnable {
 
                         System.out.println(extendedData);
 
-                        getDataBus().publishData(this.getClass(), extendedData);
+                        getEventBus().publishData(this.getClass(), extendedData);
                     } else {
                         throw new Exception("There is no data in the door " + doorProperties.id);
                     }

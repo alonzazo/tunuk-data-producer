@@ -2,13 +2,13 @@ package factories.dataproducersfactories;
 
 import producers.DataProducer;
 import producers.GPSDataProducer.Dell3003RxtxGPSDataProducer;
-import utils.DataBus;
+import utils.EventBus;
 
 import java.util.Properties;
 
 public class Dell3003RxtxGPSDataProducerFactory implements DataProducerFactory {
     @Override
-    public DataProducer create(Properties properties, DataBus dataBus) throws DataProducerPropertyNotDefinedException {
+    public DataProducer create(Properties properties, EventBus EventBus) throws DataProducerPropertyNotDefinedException {
 
         String serialPort;
 
@@ -17,12 +17,12 @@ public class Dell3003RxtxGPSDataProducerFactory implements DataProducerFactory {
         else
             throw new DataProducerPropertyNotDefinedException("producer.serialport");
 
-        return new Dell3003RxtxGPSDataProducer(serialPort, dataBus);
+        return new Dell3003RxtxGPSDataProducer(serialPort, EventBus);
     }
 
     @Override
-    public DataProducer create(DataBus dataBus) {
-        return new Dell3003RxtxGPSDataProducer("/dev/ttyHS0", dataBus);
+    public DataProducer create(EventBus EventBus) {
+        return new Dell3003RxtxGPSDataProducer("/dev/ttyHS0", EventBus);
     }
 
 }
