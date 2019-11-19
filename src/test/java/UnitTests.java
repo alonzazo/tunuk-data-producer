@@ -90,7 +90,7 @@ public class UnitTests {
 
             /*H8922STest();*/
 
-            configurationProps();
+            /*configurationProps();*/
 
             /*List<Map<String,String>> list = new LinkedList<>();
 

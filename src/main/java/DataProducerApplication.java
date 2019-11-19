@@ -11,16 +11,16 @@ import producers.DataProducer;
 import eventbuses.DataBus;
 import eventbuses.EventBus;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Function;
 
 public class DataProducerApplication {
     /*public static final Logger log = LogManager.getLogger("ConsoleFile");*/
+    private static final String IDENTITY_FILE_PATH = "configurations/identity.properties";
+    private static Properties identity;
+
 
     public static void main(String args[]){
 
@@ -31,12 +31,21 @@ public class DataProducerApplication {
             List<Pair<String, Properties>> producersConfigurations;
 
             // -------------------------------------------------------------------------------------------- INITIALIZING
-            Properties identity;
+
             // Cargar datos de identidad del bus
             if (argList.contains("--debug")){
-                identity = loadFileProperties(DataProducerApplication.class.getResource("configurations/identity.properties").getPath());
-            }else {
-                identity = loadFileProperties("configurations/identity.properties");
+                try {
+                    identity = loadIdentityFile(DataProducerApplication.class.getResource("").getPath() + IDENTITY_FILE_PATH);
+                } catch (Exception ex){
+                    identity = createNewIdentityFile(DataProducerApplication.class.getResource("").getPath() + IDENTITY_FILE_PATH);
+                }
+
+            } else {
+                try {
+                    identity = loadIdentityFile(IDENTITY_FILE_PATH);
+                } catch (Exception ex){
+                    identity = createNewIdentityFile(IDENTITY_FILE_PATH);
+                }
             }
 
 
@@ -148,11 +157,52 @@ public class DataProducerApplication {
         }
     }
 
-    private static Properties loadFileProperties(String propertiesPathFile) throws IOException {
-        FileInputStream fileInputStream = new FileInputStream(propertiesPathFile);
+    private static Properties createNewIdentityFile(String path) {
+        Properties properties = null;
+        try {
+            //Creamos el archivo
+            File file = new File(path);
+            file.createNewFile();
+
+            // Se genera el UUID
+            String id = UUID.randomUUID().toString();
+
+            // Inicializamos el impresor
+            PrintWriter printWriter = new PrintWriter(file);
+            printWriter.print(id);
+            printWriter.close();
+
+            // Se crea las propiedades
+            properties = new Properties();
+            properties.put("id", id);
+
+        } catch (Exception ex){
+            ex.printStackTrace();
+        }
+
+        return properties;
+
+    }
+
+    private static Properties loadIdentityFile(String identityFilePath) throws Exception {
+        FileInputStream fileInputStream = new FileInputStream(identityFilePath);
+        Scanner scanner = new Scanner(fileInputStream);
+
+        String id;
+        if (scanner.hasNext()){
+            id = scanner.nextLine();
+            try {
+                UUID.fromString(id);
+            } catch (Exception ex){
+                throw new Exception("Invalid identity structure");
+            }
+
+        }
+        else
+            throw new Exception("Invalid identity file");
 
         Properties properties = new Properties();
-        properties.load(fileInputStream);
+        properties.put("id", id);
 
         return properties;
     }
@@ -216,10 +266,7 @@ public class DataProducerApplication {
         //Componemos el JsonFinal
         JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject.put("eventId",identity.getProperty("eventId"));
-            jsonObject.put("busId",identity.getProperty("busId"));
-            jsonObject.put("companyId",identity.getProperty("companyId"));
-            jsonObject.put("deviceId",identity.getProperty("deviceId"));
+            jsonObject.put("id",identity.getProperty("id"));
             jsonObject.put("timestamp",currentTimestamp);
             jsonObject.put("data",jsonDataArray);
         } catch (Exception ignored){}
