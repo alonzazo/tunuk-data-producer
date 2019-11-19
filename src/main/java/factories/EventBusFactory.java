@@ -1,6 +1,6 @@
 package factories;
 
-import utils.EventBus;
+import eventbuses.EventBus;
 
 public interface EventBusFactory {
     EventBus create();

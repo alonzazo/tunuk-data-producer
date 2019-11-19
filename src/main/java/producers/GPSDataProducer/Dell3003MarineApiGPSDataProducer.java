@@ -7,7 +7,7 @@ import net.sf.marineapi.nmea.event.SentenceListener;
 import net.sf.marineapi.nmea.io.SentenceReader;
 import net.sf.marineapi.nmea.sentence.SentenceValidator;
 import producers.DataProducer;
-import utils.EventBus;
+import eventbuses.EventBus;
 
 import java.io.BufferedReader;
 import java.io.IOException;

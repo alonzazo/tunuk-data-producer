@@ -1,6 +1,6 @@
 package factories;
 
-import utils.MicrobatchDataBus;
+import eventbuses.MicrobatchDataBus;
 
 public class MicrobatchDataBusFactory implements EventBusFactory{
 

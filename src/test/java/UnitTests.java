@@ -2,7 +2,7 @@ import javafx.util.Pair;
 import producers.DataProducer;
 import producers.GPSDataProducer.Dell3003RxtxGPSDataProducer;
 import producers.GPSDataProducer.HongdianH8922SGPSDataProducer;
-import utils.StreamingEventBus;
+import eventbuses.StreamingEventBus;
 
 import java.io.FileReader;
 import java.util.*;
@@ -90,7 +90,7 @@ public class UnitTests {
 
             /*H8922STest();*/
 
-            configurationProps();
+            /*configurationProps();*/
 
             /*List<Map<String,String>> list = new LinkedList<>();
 

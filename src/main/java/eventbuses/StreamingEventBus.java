@@ -1,6 +1,6 @@
-package utils;
+package eventbuses;
 
-import consumers.Subscriber;
+import subscribers.Subscriber;
 
 import java.util.LinkedList;
 import java.util.List;
