@@ -1,7 +1,7 @@
 package producers.APCDataProducer;
 
 import producers.DataProducer;
-import utils.EventBus;
+import eventbuses.EventBus;
 
 import java.io.IOException;
 import java.net.DatagramPacket;

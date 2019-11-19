@@ -7,7 +7,7 @@ import net.sf.marineapi.nmea.sentence.RMCSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.util.Position;
 import producers.DataProducer;
-import utils.EventBus;
+import eventbuses.EventBus;
 
 import java.io.IOException;
 import java.net.DatagramPacket;

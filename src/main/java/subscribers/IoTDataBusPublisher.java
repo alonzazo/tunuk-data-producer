@@ -1,4 +1,4 @@
-package consumers;
+package subscribers;
 
 import connectors.IoTConnector;
 

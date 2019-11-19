@@ -10,7 +10,7 @@ import net.sf.marineapi.nmea.sentence.GLLSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.util.Position;
 import producers.DataProducer;
-import utils.EventBus;
+import eventbuses.EventBus;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;

@@ -2,7 +2,7 @@ package factories.dataproducersfactories;
 
 import producers.DataProducer;
 import producers.GPSDataProducer.HongdianH8922SGPSDataProducer;
-import utils.EventBus;
+import eventbuses.EventBus;
 
 import java.util.Properties;
 

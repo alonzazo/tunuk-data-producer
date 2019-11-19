@@ -1,6 +1,6 @@
 package factories;
 
-import utils.StreamingEventBus;
+import eventbuses.StreamingEventBus;
 
 public class StreamingEventBusFactory implements EventBusFactory{
 

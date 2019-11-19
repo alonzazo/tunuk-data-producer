@@ -1,4 +1,4 @@
-package consumers;
+package subscribers;
 
 public interface DataBusPublisher extends DataBusConsumer {
 

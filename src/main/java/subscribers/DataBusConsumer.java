@@ -1,6 +1,6 @@
-package consumers;
+package subscribers;
 
-import utils.DataBus;
+import eventbuses.DataBus;
 
 public interface DataBusConsumer {
     void setDataBus(DataBus dataBus);

@@ -2,7 +2,7 @@ package factories.dataproducersfactories;
 
 import producers.APCDataProducer.HellaAPCECORS485DataProducer;
 import producers.DataProducer;
-import utils.EventBus;
+import eventbuses.EventBus;
 
 import java.util.Properties;
 

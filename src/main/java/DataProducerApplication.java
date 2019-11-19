@@ -1,15 +1,15 @@
 import absfactories.DataProducerAbsFactory;
 import absfactories.EventBusAbsFactory;
 import connectors.IoTConnector;
-import consumers.IoTDataBusPublisher;
-import consumers.Subscriber;
+import subscribers.IoTDataBusPublisher;
+import subscribers.Subscriber;
 import factories.*;
 import javafx.util.Pair;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONObject;
 import producers.DataProducer;
-import utils.DataBus;
-import utils.EventBus;
+import eventbuses.DataBus;
+import eventbuses.EventBus;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

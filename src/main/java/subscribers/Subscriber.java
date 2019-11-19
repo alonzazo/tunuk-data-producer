@@ -1,4 +1,4 @@
-package consumers;
+package subscribers;
 
 import java.util.List;
 import java.util.Map;

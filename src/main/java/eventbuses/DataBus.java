@@ -1,4 +1,4 @@
-package utils;
+package eventbuses;
 
 import java.util.List;
 import java.util.Map;

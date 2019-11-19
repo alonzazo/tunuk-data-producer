@@ -1,6 +1,6 @@
 package producers;
 
-import utils.EventBus;
+import eventbuses.EventBus;
 
 public interface DataProducer {
 
