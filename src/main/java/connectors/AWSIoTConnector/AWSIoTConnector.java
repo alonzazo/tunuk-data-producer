@@ -38,6 +38,7 @@ public class AWSIoTConnector implements IoTConnector {
         SampleUtil.KeyStorePasswordPair pair = SampleUtil.getKeyStorePasswordPair(certificateFile, privateKeyFile);
         client = new AWSIotMqttClient(clientEndpoint, clientId, pair.keyStore, pair.keyPassword);
 
+
         try{
             // optional parameters can be set before connect()
             client.connect();
@@ -92,7 +93,7 @@ public class AWSIoTConnector implements IoTConnector {
             }
         }
 
-        AWSIotQos qos = AWSIotQos.QOS0;
+        AWSIotQos qos = AWSIotQos.QOS1;
         long timeout = 3000;                    // milliseconds
 
         System.out.println("Mensaje por enviarse: " + message);
