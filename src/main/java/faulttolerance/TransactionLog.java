@@ -10,7 +10,4 @@ public class TransactionLog {
     public enum State {
         begin, commit, abort
     }
-
-
-
 }

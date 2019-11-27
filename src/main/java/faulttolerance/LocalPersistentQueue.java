@@ -5,7 +5,8 @@ import java.io.File;
 import java.util.List;
 import java.util.Queue;
 
-public class PersistantMessageQueue {
+public class LocalPersistentQueue implements PersistentQueue {
+
 
     private Queue<String> messagesQueue;
     private List<TransactionLog> logBuffer;
@@ -14,9 +15,14 @@ public class PersistantMessageQueue {
     private File file;
     private File WALFile;
 
-    public String popMessage(){
+    public String pollMessage(){
 
         return messagesQueue.poll();
+    }
+
+    @Override
+    public String pickMessage() {
+        return null;
     }
 
     public void flush(){
