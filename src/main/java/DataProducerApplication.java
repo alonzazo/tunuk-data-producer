@@ -1,17 +1,22 @@
-import absfactories.DataProducerAbsFactory;
-import absfactories.EventBusAbsFactory;
+import absfactories.*;
 import connectors.IoTConnector;
-import faulttolerance.BerkleyDBPersistentQueue;
+import eventbuses.DataBus;
+import eventbuses.EventBus;
+import factories.IoTConnectorFactory;
+import factories.IoTConnectorType;
+import factories.eventbusesfactories.EventBusFactory;
+import factories.eventbusesfactories.EventBusType;
+import factories.eventbusesfactories.MicrobatchDataBusFactory;
+import factories.persistentqueuesfactories.BerkleyDBPersistentQueueFactory;
+import factories.persistentqueuesfactories.PersistentQueueFactory;
+import factories.subscribersfactories.IoTDataBusPublisherFactory;
+import factories.subscribersfactories.SubscriberFactory;
 import faulttolerance.PersistentQueue;
-import subscribers.IoTDataBusPublisher;
-import subscribers.Subscriber;
-import factories.*;
 import javafx.util.Pair;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONObject;
 import producers.DataProducer;
-import eventbuses.DataBus;
-import eventbuses.EventBus;
+import subscribers.Subscriber;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
@@ -41,7 +46,6 @@ public class DataProducerApplication {
                 } catch (Exception ex){
                     identity = createNewIdentityFile(DataProducerApplication.class.getResource("").getPath() + IDENTITY_FILE_PATH);
                 }
-
             } else {
                 try {
                     identity = loadIdentityFile(IDENTITY_FILE_PATH);
@@ -49,8 +53,6 @@ public class DataProducerApplication {
                     identity = createNewIdentityFile(IDENTITY_FILE_PATH);
                 }
             }
-
-
 
             // ------------------------------------------------------------------------------------- CONFIGURE IOTSERVER
             IoTConnector ioTConnector;
@@ -146,12 +148,24 @@ public class DataProducerApplication {
 
             // -----------------------------------------------------------------------------------FAULT TOLERANCE SYSTEM
 
-            PersistentQueue persistentQueue = new BerkleyDBPersistentQueue("data-backups","IoTQueueBackup",10);
+            PersistentQueueFactory persistentQueueFactory = PersistentQueueAbsFactory.createFactory(PersistentQueueType.BERKLEY_DB);
+            ((BerkleyDBPersistentQueueFactory) persistentQueueFactory)
+                    .setQueueEnvironmentPath("data-backups")
+                    .setQueueName("IoTQueueBackup")
+                    .setCacheSize(10);
+
+            PersistentQueue persistentQueue = persistentQueueFactory.create();
 
             // ------------------------------------------------------------------------TRANSMIT THE MESSAGE TO IOTSERVER
 
+            SubscriberFactory subscriberFactory = SubscriberAbsFactory.createFactory(SubscriberType.IOT_DATA_BUS_PUBLISHER);
+            ((IoTDataBusPublisherFactory) subscriberFactory)
+                    .setIoTConnector(ioTConnector)
+                    .setTopic("data-producer-test")
+                    .setHandlerFunction(composerFunction)
+                    .setPersistentQueue(persistentQueue);
 
-            Subscriber dataBusPublisher = new IoTDataBusPublisher(ioTConnector, "dell3003test", composerFunction, persistentQueue);
+            Subscriber dataBusPublisher = subscriberFactory.create();
             dataBusMap.values().forEach((eventBus) -> eventBus.subscribe(dataBusPublisher));
 
 
