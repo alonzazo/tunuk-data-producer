@@ -1,6 +1,8 @@
 import absfactories.DataProducerAbsFactory;
 import absfactories.EventBusAbsFactory;
 import connectors.IoTConnector;
+import faulttolerance.BerkleyDBPersistentQueue;
+import faulttolerance.PersistentQueue;
 import subscribers.IoTDataBusPublisher;
 import subscribers.Subscriber;
 import factories.*;
@@ -75,6 +77,8 @@ public class DataProducerApplication {
             List<DataProducer> dataProducerList = new LinkedList<>();
             Map<String,EventBus> dataBusMap = new HashMap<>();
 
+            // Gather
+
             // DataProducers gathering initialization
             for (Pair<String, Properties> producerConfiguration:
                  producersConfigurations) {
@@ -140,10 +144,14 @@ public class DataProducerApplication {
                 return composeMessage(identity, currentDataBus);
             };
 
+            // -----------------------------------------------------------------------------------FAULT TOLERANCE SYSTEM
+
+            PersistentQueue persistentQueue = new BerkleyDBPersistentQueue("data-backups","IoTQueueBackup",10);
+
             // ------------------------------------------------------------------------TRANSMIT THE MESSAGE TO IOTSERVER
 
 
-            Subscriber dataBusPublisher = new IoTDataBusPublisher(ioTConnector, "dell3003test", composerFunction);
+            Subscriber dataBusPublisher = new IoTDataBusPublisher(ioTConnector, "dell3003test", composerFunction, persistentQueue);
             dataBusMap.values().forEach((eventBus) -> eventBus.subscribe(dataBusPublisher));
 
 

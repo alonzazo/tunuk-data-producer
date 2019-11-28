@@ -80,11 +80,6 @@ public class BerkleyDBPersistentQueue implements PersistentQueue {
     }
 
     @Override
-    public String pickMessage() {
-        return null;
-    }
-
-    @Override
     public void pushMessage(String message) throws PersistentQueueException {
         try {
             DatabaseEntry key = new DatabaseEntry();
@@ -124,16 +119,6 @@ public class BerkleyDBPersistentQueue implements PersistentQueue {
             throw new PersistentQueueException(e);
         }
 
-
-    }
-
-    @Override
-    public void flush() {
-
-    }
-
-    @Override
-    public void fetch() {
 
     }
 

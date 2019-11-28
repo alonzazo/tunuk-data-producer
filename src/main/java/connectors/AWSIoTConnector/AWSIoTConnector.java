@@ -37,8 +37,7 @@ public class AWSIoTConnector implements IoTConnector {
 // Alternatively, you could load key store directly from a file - see the example included in this README.
         SampleUtil.KeyStorePasswordPair pair = SampleUtil.getKeyStorePasswordPair(certificateFile, privateKeyFile);
         client = new AWSIotMqttClient(clientEndpoint, clientId, pair.keyStore, pair.keyPassword);
-
-
+        client.setMaxOfflineQueueSize(10);
         try{
             // optional parameters can be set before connect()
             client.connect();
@@ -96,11 +95,12 @@ public class AWSIoTConnector implements IoTConnector {
         AWSIotQos qos = AWSIotQos.QOS1;
         long timeout = 3000;                    // milliseconds
 
-        System.out.println("Mensaje por enviarse: " + message);
+        System.out.println("[MENSAJE] Por transmitirse: " + message);
         MyMessage myMessage = new MyMessage(topic, qos, message);
 
         try {
             client.publish(myMessage, timeout);
+            System.out.println("[MENSAJE] Transmitido con éxito");
         } catch (AWSIotException e) {
             throw new IoTConnectorException(e);
         }

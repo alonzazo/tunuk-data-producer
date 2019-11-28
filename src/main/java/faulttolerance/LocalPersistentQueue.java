@@ -20,12 +20,12 @@ public class LocalPersistentQueue implements PersistentQueue {
         return messagesQueue.poll();
     }
 
-    @Override
-    public String pickMessage() {
-        return null;
+    public void flush(){
+
     }
 
-    public void flush(){
+    @Override
+    public void close() throws PersistentQueueException {
 
     }
 
@@ -46,6 +46,11 @@ public class LocalPersistentQueue implements PersistentQueue {
         // Se escribe en el WALFile
 
 
+    }
+
+    @Override
+    public long size() {
+        return 0;
     }
 
     public void restoreFrom(String filePath){
