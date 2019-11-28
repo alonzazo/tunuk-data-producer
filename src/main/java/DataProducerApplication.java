@@ -34,7 +34,6 @@ public class DataProducerApplication {
         try {
 
             List<String> argList = Arrays.asList(args);
-            /*DataBus dataBus = DataBusFactory.create(DataBusType.SYNCRONIZED);*/
             List<Pair<String, Properties>> producersConfigurations;
 
             // -------------------------------------------------------------------------------------------- INITIALIZING
@@ -75,67 +74,11 @@ public class DataProducerApplication {
             ioTConnector.connect();
             // ---------------------------------------------------------------------------------GATHER DATA FROM SENSORS
 
-            // Gather CAN-BUS data
+            Map<String,EventBus> eventBusMap = new HashMap<>();
             List<DataProducer> dataProducerList = new LinkedList<>();
-            Map<String,EventBus> dataBusMap = new HashMap<>();
 
-            // Gather
-
-            // DataProducers gathering initialization
-            for (Pair<String, Properties> producerConfiguration:
-                 producersConfigurations) {
-                try {
-
-                    EventBus currentEventBus;
-                    // Se revisa qué tipo de databus ocupa el productor
-                    // Si es micro batch
-                    if (producerConfiguration.getValue().containsKey("databus.mode") &&
-                        producerConfiguration.getValue().getProperty("databus.mode").equals("microbatch")){
-
-                        // Se obtiene el intervalo
-                        Long intervalMilis = 1000L; // Valor default //Cast
-                        if (producerConfiguration.getValue().containsKey( "databus.interval" ))
-                            intervalMilis = Long.valueOf(producerConfiguration.getValue().getProperty("databus.interval"));
-
-                        // Se revisa si ya existe uno de ese intervalo tiempo (en unidades de milisegundos)
-                        if (dataBusMap.containsKey(intervalMilis.toString()))
-                            currentEventBus = dataBusMap.get(intervalMilis.toString());
-                        // Si no, se crea uno nuevo y se asigna como
-                        else {
-                            MicrobatchDataBusFactory microbatchDataBusFactory = (MicrobatchDataBusFactory) EventBusAbsFactory.create(EventBusType.MICROBATCH); //TODO Buscar la forma de no usar casting
-                            currentEventBus = microbatchDataBusFactory.create(intervalMilis);
-                            dataBusMap.put(intervalMilis.toString(), currentEventBus);
-                            ((DataBus) currentEventBus).startPublication();
-                        }
-
-                    } // Si no se asigna como streaming
-                    else {
-                        // Se asigna el databus de streaming
-                        if (dataBusMap.containsKey( "streaming" ))
-                            currentEventBus = dataBusMap.get("streaming");
-                        else {
-                            EventBusFactory streamingDataBusFactory = EventBusAbsFactory.create(EventBusType.STREAMING);
-                            currentEventBus = streamingDataBusFactory.create();
-                            dataBusMap.put( "streaming", currentEventBus );
-                        }
-                    }
-
-                    // Se crea el productor de dato y se le asigna el databus
-                    DataProducer dataProducer = DataProducerAbsFactory
-                            .createFactory(producerConfiguration.getKey())
-                            .create(producerConfiguration.getValue(), currentEventBus);
-
-                    // Se inicia la producción
-                    dataProducer.startProduction();
-
-                    // Se añade a la lista de productores de datos
-                    dataProducerList.add(dataProducer);
-
-                }catch (Exception ex){
-                    ex.printStackTrace();
-                    System.out.println(ex.getMessage());
-                }
-            }
+            // DataProducers and eventBusMap gathering initialization
+            initializeDataProducers(producersConfigurations, eventBusMap, dataProducerList);
 
             // ---------------------------------------------------------------------------FILTER AND COMPOSE THE MESSAGE
 
@@ -166,7 +109,7 @@ public class DataProducerApplication {
                     .setPersistentQueue(persistentQueue);
 
             Subscriber dataBusPublisher = subscriberFactory.create();
-            dataBusMap.values().forEach((eventBus) -> eventBus.subscribe(dataBusPublisher));
+            eventBusMap.values().forEach((eventBus) -> eventBus.subscribe(dataBusPublisher));
 
 
             // -----------------------------------------------------------------------------------------CLOSE CONNECTION
@@ -176,6 +119,63 @@ public class DataProducerApplication {
 
             e.printStackTrace();
             System.out.println(e.getMessage());
+        }
+    }
+
+    private static void initializeDataProducers(List<Pair<String, Properties>> producersConfigurations, Map<String, EventBus> eventBusMap, List<DataProducer> dataProducerList){
+        for (Pair<String, Properties> producerConfiguration:
+                producersConfigurations) {
+            try {
+
+                EventBus currentEventBus;
+                // Se revisa qué tipo de databus ocupa el productor
+                // Si es micro batch
+                if (producerConfiguration.getValue().containsKey("databus.mode") &&
+                        producerConfiguration.getValue().getProperty("databus.mode").equals("microbatch")){
+
+                    // Se obtiene el intervalo
+                    Long intervalMilis = 1000L; // Valor default //Cast
+                    if (producerConfiguration.getValue().containsKey( "databus.interval" ))
+                        intervalMilis = Long.valueOf(producerConfiguration.getValue().getProperty("databus.interval"));
+
+                    // Se revisa si ya existe uno de ese intervalo tiempo (en unidades de milisegundos)
+                    if (eventBusMap.containsKey(intervalMilis.toString()))
+                        currentEventBus = eventBusMap.get(intervalMilis.toString());
+                        // Si no, se crea uno nuevo y se asigna como
+                    else {
+                        MicrobatchDataBusFactory microbatchDataBusFactory = (MicrobatchDataBusFactory) EventBusAbsFactory.create(EventBusType.MICROBATCH); //TODO Buscar la forma de no usar casting
+                        currentEventBus = microbatchDataBusFactory.create(intervalMilis);
+                        eventBusMap.put(intervalMilis.toString(), currentEventBus);
+                        ((DataBus) currentEventBus).startPublication();
+                    }
+
+                } // Si no se asigna como streaming
+                else {
+                    // Se asigna el databus de streaming
+                    if (eventBusMap.containsKey( "streaming" ))
+                        currentEventBus = eventBusMap.get("streaming");
+                    else {
+                        EventBusFactory streamingDataBusFactory = EventBusAbsFactory.create(EventBusType.STREAMING);
+                        currentEventBus = streamingDataBusFactory.create();
+                        eventBusMap.put( "streaming", currentEventBus );
+                    }
+                }
+
+                // Se crea el productor de dato y se le asigna el databus
+                DataProducer dataProducer = DataProducerAbsFactory
+                        .createFactory(producerConfiguration.getKey())
+                        .create(producerConfiguration.getValue(), currentEventBus);
+
+                // Se inicia la producción
+                dataProducer.startProduction();
+
+                // Se añade a la lista de productores de datos
+                dataProducerList.add(dataProducer);
+
+            }catch (Exception ex){
+                ex.printStackTrace();
+                System.out.println(ex.getMessage());
+            }
         }
     }
 
