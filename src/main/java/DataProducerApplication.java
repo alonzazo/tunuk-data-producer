@@ -1,4 +1,5 @@
 import absfactories.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import connectors.IoTConnector;
 import eventbuses.DataBus;
 import eventbuses.EventBus;
@@ -12,8 +13,6 @@ import factories.persistentqueuesfactories.PersistentQueueFactory;
 import factories.subscribersfactories.IoTDataBusPublisherFactory;
 import factories.subscribersfactories.SubscriberFactory;
 import faulttolerance.PersistentQueue;
-import javafx.util.Pair;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONObject;
 import producers.DataProducer;
 import subscribers.Subscriber;
@@ -34,7 +33,8 @@ public class DataProducerApplication {
         try {
 
             List<String> argList = Arrays.asList(args);
-            List<Pair<String, Properties>> producersConfigurations;
+            /*List<Pair<String, Properties>> producersConfigurations;*/
+            List<Map.Entry<String, Properties>> producersConfigurations;
 
             // -------------------------------------------------------------------------------------------- INITIALIZING
 
@@ -104,7 +104,7 @@ public class DataProducerApplication {
             SubscriberFactory subscriberFactory = SubscriberAbsFactory.createFactory(SubscriberType.IOT_DATA_BUS_PUBLISHER);
             ((IoTDataBusPublisherFactory) subscriberFactory)
                     .setIoTConnector(ioTConnector)
-                    .setTopic("data-producer-test")
+                    .setTopic("company-0001/data-producers")
                     .setHandlerFunction(composerFunction)
                     .setPersistentQueue(persistentQueue);
 
@@ -122,8 +122,8 @@ public class DataProducerApplication {
         }
     }
 
-    private static void initializeDataProducers(List<Pair<String, Properties>> producersConfigurations, Map<String, EventBus> eventBusMap, List<DataProducer> dataProducerList){
-        for (Pair<String, Properties> producerConfiguration:
+    private static void initializeDataProducers(List<Map.Entry<String, Properties>> producersConfigurations, Map<String, EventBus> eventBusMap, List<DataProducer> dataProducerList){
+        for (Map.Entry<String, Properties> producerConfiguration:
                 producersConfigurations) {
             try {
 
@@ -229,7 +229,7 @@ public class DataProducerApplication {
         return properties;
     }
 
-    private static List<Pair<String, Properties>> loadProducersConfigurations(String filePath) throws FileNotFoundException {
+    private static List<Map.Entry<String, Properties>> loadProducersConfigurations(String filePath) throws FileNotFoundException {
 
         // Se carga el archivo
         FileReader fileReader = new FileReader(filePath);
@@ -239,7 +239,7 @@ public class DataProducerApplication {
         scanner.useDelimiter("\n");
 
         // Inicializamos contenedores y variables
-        List<Pair<String, Properties>> producersList = new LinkedList<>();
+        List<Map.Entry<String, Properties>> producersList = new LinkedList<>();
         int LINES_LIMIT = 1024;
 
         Properties currentProperties = new Properties();
@@ -260,7 +260,7 @@ public class DataProducerApplication {
 
                 // Si al leer es la última línea permitida o del archivo se agrega como un par Nombre de productor y sus propiedades
                 if (i == LINES_LIMIT - 1 || !scanner.hasNext()){
-                    producersList.add(new Pair<>(currentProducerName,currentProperties));
+                    producersList.add(new AbstractMap.SimpleEntry<>(currentProducerName,currentProperties));
                 }
             }
             // Si la linea no esta vacia, es decir, es un nombre nuevo de productor entonces
@@ -268,7 +268,7 @@ public class DataProducerApplication {
                 // Si el nombre del productor no esta vacio
                 if (!currentProducerName.equals("")){
                     // Se agrega un par Nombre de productor y sus propiedades
-                    producersList.add(new Pair<>(currentProducerName,currentProperties));
+                    producersList.add(new AbstractMap.SimpleEntry<>(currentProducerName,currentProperties));
                     currentProperties = new Properties();
                 }
                 // Finalmente, el nuevo nombre de productor se asigna como Nombre de productor actual
