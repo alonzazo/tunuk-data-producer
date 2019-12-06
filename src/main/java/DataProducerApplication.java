@@ -33,7 +33,6 @@ public class DataProducerApplication {
         try {
 
             List<String> argList = Arrays.asList(args);
-            /*List<Pair<String, Properties>> producersConfigurations;*/
             List<Map.Entry<String, Properties>> producersConfigurations;
 
             // -------------------------------------------------------------------------------------------- INITIALIZING
@@ -84,9 +83,9 @@ public class DataProducerApplication {
 
             Function<List<Map<String,String>>,String> composerFunction = (currentDataBus) -> {
                 // Se filtra el dataBus
-
+                List<Map<String, String>> dataFiltered = filterJustOneMessageByScheme(currentDataBus);
                 // Se compone el mensaje
-                return composeMessage(identity, currentDataBus);
+                return composeMessage(identity, dataFiltered);
             };
 
             // -----------------------------------------------------------------------------------FAULT TOLERANCE SYSTEM
@@ -120,6 +119,22 @@ public class DataProducerApplication {
             e.printStackTrace();
             System.out.println(e.getMessage());
         }
+    }
+
+    private static List<Map<String, String>> filterJustOneMessageByScheme(List<Map<String, String>> dataBusList) {
+        HashSet<String> schemesSet = new HashSet<>();
+        List<Map<String, String>> result = new LinkedList<>();
+
+        dataBusList.forEach( (dataBus) -> {
+            if (dataBus.containsKey("data-scheme"))
+                if (!schemesSet.contains(dataBus.get("data-scheme"))){
+                    result.add(dataBus);
+                    schemesSet.add(dataBus.get("data-scheme"));
+                }
+        });
+
+        return result;
+
     }
 
     private static void initializeDataProducers(List<Map.Entry<String, Properties>> producersConfigurations, Map<String, EventBus> eventBusMap, List<DataProducer> dataProducerList){
@@ -317,4 +332,5 @@ public class DataProducerApplication {
         else
             return "[]";
     }
+
 }
