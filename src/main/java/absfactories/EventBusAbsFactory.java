@@ -1,9 +1,9 @@
 package absfactories;
 
-import factories.EventBusFactory;
-import factories.EventBusType;
-import factories.MicrobatchDataBusFactory;
-import factories.StreamingEventBusFactory;
+import factories.eventbusesfactories.EventBusFactory;
+import factories.eventbusesfactories.EventBusType;
+import factories.eventbusesfactories.MicrobatchDataBusFactory;
+import factories.eventbusesfactories.StreamingEventBusFactory;
 
 public class EventBusAbsFactory {
 

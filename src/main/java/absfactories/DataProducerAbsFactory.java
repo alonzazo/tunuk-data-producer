@@ -8,8 +8,6 @@ public class DataProducerAbsFactory {
 
     public static DataProducerFactory createFactory(DataProducerType type) throws DataProducerNotFoundException {
         switch (type){
-            case DELL_3003_ARCGIS:
-                return new Dell3003ArcGISGPSDataProducerFactory();
             case HONGDIAN_H8922S:
                 return new HongdianH8922SGPSDataProducerFactory();
             case HELLA_APC_ECO_RS485:
