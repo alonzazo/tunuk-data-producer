@@ -55,19 +55,19 @@ public class DataProducerApplication {
             IoTConnector ioTConnector;
             if (argList.contains("--stdout")){
                 ioTConnector = IoTConnectorFactory.create(IoTConnectorType.STANDARD_OUTPUT);
-            } else if (argList.contains("--kafka")){
-                ioTConnector = IoTConnectorFactory.create(IoTConnectorType.KAFKA_PRODUCER);
-            } else {
+            } else if (argList.contains("--aws")){
                 ioTConnector = IoTConnectorFactory.create(IoTConnectorType.AMAZON_WEB_SERVICES);
+            } else {
+                ioTConnector = IoTConnectorFactory.create(IoTConnectorType.KAFKA_PRODUCER);
             }
 
             if (argList.contains("--debug")){
                 //ioTConnector.configure(DataProducerApplication.class.getResource("configurations/aws-config.properties").getPath());
                 producersConfigurations = loadProducersConfigurations(DataProducerApplication.class.getResource("configurations/producers-config.properties").getPath());
-            } else if (argList.contains("--kafka")){
-                producersConfigurations = loadProducersConfigurations(DataProducerApplication.class.getResource("configurations/producers-config.properties").getPath());
-            } else {
+            } else if (argList.contains("--aws")){
                 ioTConnector.configure("configurations/aws-config.properties");
+                producersConfigurations = loadProducersConfigurations("configurations/producers-config.properties");
+            } else {
                 producersConfigurations = loadProducersConfigurations("configurations/producers-config.properties");
             }
 
