@@ -43,6 +43,7 @@ public class IoTDataBusPublisher implements Subscriber {
 
             message = handlerFunction.apply(data);
             ioTConnector.publish(topic,message);
+            System.out.println(message);
 
             //TODO Evaluar si es mejor enviar respaldos junto con mensajes
             long size = persistentQueue.size();

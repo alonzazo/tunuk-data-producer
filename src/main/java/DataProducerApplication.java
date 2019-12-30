@@ -27,7 +27,6 @@ public class DataProducerApplication {
     private static final String IDENTITY_FILE_PATH = "configurations/identity.properties";
     private static Properties identity;
 
-
     public static void main(String args[]){
 
         try {
@@ -56,14 +55,18 @@ public class DataProducerApplication {
             IoTConnector ioTConnector;
             if (argList.contains("--stdout")){
                 ioTConnector = IoTConnectorFactory.create(IoTConnectorType.STANDARD_OUTPUT);
+            } else if (argList.contains("--kafka")){
+                ioTConnector = IoTConnectorFactory.create(IoTConnectorType.KAFKA_PRODUCER);
             } else {
                 ioTConnector = IoTConnectorFactory.create(IoTConnectorType.AMAZON_WEB_SERVICES);
             }
 
             if (argList.contains("--debug")){
-                ioTConnector.configure(DataProducerApplication.class.getResource("configurations/aws-config.properties").getPath());
+                //ioTConnector.configure(DataProducerApplication.class.getResource("configurations/aws-config.properties").getPath());
                 producersConfigurations = loadProducersConfigurations(DataProducerApplication.class.getResource("configurations/producers-config.properties").getPath());
-            }else {
+            } else if (argList.contains("--kafka")){
+                producersConfigurations = loadProducersConfigurations(DataProducerApplication.class.getResource("configurations/producers-config.properties").getPath());
+            } else {
                 ioTConnector.configure("configurations/aws-config.properties");
                 producersConfigurations = loadProducersConfigurations("configurations/producers-config.properties");
             }
@@ -103,7 +106,7 @@ public class DataProducerApplication {
             SubscriberFactory subscriberFactory = SubscriberAbsFactory.createFactory(SubscriberType.IOT_DATA_BUS_PUBLISHER);
             ((IoTDataBusPublisherFactory) subscriberFactory)
                     .setIoTConnector(ioTConnector)
-                    .setTopic("company-0001/data-producers")
+                    .setTopic("data-producers")
                     .setHandlerFunction(composerFunction)
                     .setPersistentQueue(persistentQueue);
 
@@ -298,14 +301,19 @@ public class DataProducerApplication {
         String currentTimestamp = getTime();
 
         // Creamos un json array a partir de los lista de los mapas datos
-        String jsonDataArray = getJsonDataArray(dataList);
+        //String jsonDataArray = getJsonDataArray(dataList);
 
         //Componemos el JsonFinal
         JSONObject jsonObject = new JSONObject();
+        List<JSONObject> jsonDataList = new LinkedList<>();
+
+        for (Map<String, String> dataElement: dataList)
+            jsonDataList.add(new JSONObject(dataElement));
+
         try {
             jsonObject.put("id",identity.getProperty("id"));
             jsonObject.put("timestamp",currentTimestamp);
-            jsonObject.put("data",jsonDataArray);
+            jsonObject.put("data",jsonDataList);
         } catch (Exception ignored){}
 
         return jsonObject.toString();
