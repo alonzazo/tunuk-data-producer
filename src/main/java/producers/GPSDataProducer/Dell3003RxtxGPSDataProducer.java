@@ -18,7 +18,7 @@ import java.util.Map;
 
 public class Dell3003RxtxGPSDataProducer implements DataProducer, SerialPortEventListener {
 
-
+    ///--------------------------------------------------------------------PROPIEDADES o ATRIBUTOS
     private SerialPort serialPort;
     private String serialPortName;
     private String residualStream = "";
@@ -36,6 +36,8 @@ public class Dell3003RxtxGPSDataProducer implements DataProducer, SerialPortEven
     public Dell3003RxtxGPSDataProducer(String serialPortName, EventBus EventBus) {
         this.EventBus = EventBus; this.serialPortName = serialPortName;
     }
+
+    ///-----------------------------------------------------------METODOS
 
     @Override
     public void setBrand(String brandName) {
