@@ -18,7 +18,8 @@ import producers.DataProducer;
 import subscribers.Subscriber;
 
 import java.io.*;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.function.Function;
 
@@ -106,7 +107,7 @@ public class DataProducerApplication {
             SubscriberFactory subscriberFactory = SubscriberAbsFactory.createFactory(SubscriberType.IOT_DATA_BUS_PUBLISHER);
             ((IoTDataBusPublisherFactory) subscriberFactory)
                     .setIoTConnector(ioTConnector)
-                    .setTopic("data-producers")
+                    .setTopic(argList.indexOf("--topic") != -1 ? argList.get(argList.indexOf("--topic") + 1): "data-producers-" + identity.getProperty("id"))
                     .setHandlerFunction(composerFunction)
                     .setPersistentQueue(persistentQueue);
 
@@ -298,7 +299,7 @@ public class DataProducerApplication {
 
     private static String composeMessage(Properties identity, List<Map<String, String>> dataList) {
         // Get the current TimeStamp
-        String currentTimestamp = getTime();
+        //String currentTimestamp = getTime();
 
         // Creamos un json array a partir de los lista de los mapas datos
         //String jsonDataArray = getJsonDataArray(dataList);
@@ -312,17 +313,18 @@ public class DataProducerApplication {
 
         try {
             jsonObject.put("id",identity.getProperty("id"));
-            jsonObject.put("timestamp",currentTimestamp);
+            jsonObject.put("date", LocalDate.from(getTime()));
+            jsonObject.put("timestamp",getTime());
             jsonObject.put("data",jsonDataList);
-        } catch (Exception ignored){}
+        } catch (Exception ignored){
+            ignored.printStackTrace();
+        }
 
         return jsonObject.toString();
     }
 
-    private static String getTime(){
-        SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss z");
-        Date date = new Date(System.currentTimeMillis());
-        return formatter.format(date);
+    private static OffsetDateTime getTime(){
+        return OffsetDateTime.now();
     }
 
     private static String getJsonDataArray(List<Map<String,String>> dataList) {

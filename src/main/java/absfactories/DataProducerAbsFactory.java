@@ -16,6 +16,8 @@ public class DataProducerAbsFactory {
                 return new Dell3003RxtxGPSDataProducerFactory();
             case DELL_3003_MARINE_API:
                 return new Dell3003MarineApiGPSDataProducerFactory();
+            case ADAFRUIT_ULTIMATE:
+                return new AdafruitUltimateGPSDataProducerFactory();
             default:
                 throw new DataProducerNotFoundException(type.toString());
         }
