@@ -14,7 +14,8 @@ import java.util.Properties;
 public class KafkaProducerConnector implements IoTConnector {
 
     private Producer kafkaProducer;
-    private String bootstrapServersConfig = "18.217.74.235:9092";
+    /*private String bootstrapServersConfig = "18.217.74.235:9092";*/
+    private String bootstrapServersConfig = "52.87.66.174:9092";
     private String keySerializerClassConfig = "org.apache.kafka.common.serialization.ByteArraySerializer";
     private String valueSerializerClassConfig = "org.apache.kafka.common.serialization.StringSerializer";
 
