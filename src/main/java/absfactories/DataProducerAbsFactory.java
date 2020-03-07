@@ -18,6 +18,10 @@ public class DataProducerAbsFactory {
                 return new Dell3003MarineApiGPSDataProducerFactory();
             case ADAFRUIT_ULTIMATE:
                 return new AdafruitUltimateGPSDataProducerFactory();
+            case TEST_GPS:
+                return new TestGPSDataProducerFactory();
+            case TEST_APC:
+                return new TestAPCDataProducerFactory();
             default:
                 throw new DataProducerNotFoundException(type.toString());
         }

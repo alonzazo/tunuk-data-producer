@@ -10,7 +10,7 @@ import factories.eventbusesfactories.EventBusType;
 import factories.eventbusesfactories.MicrobatchDataBusFactory;
 import factories.persistentqueuesfactories.BerkleyDBPersistentQueueFactory;
 import factories.persistentqueuesfactories.PersistentQueueFactory;
-import factories.subscribersfactories.IoTDataBusPublisherFactory;
+import factories.subscribersfactories.EagerIoTDataBusPublisherFactory;
 import factories.subscribersfactories.SubscriberFactory;
 import faulttolerance.PersistentQueue;
 import org.json.JSONObject;
@@ -18,13 +18,17 @@ import producers.DataProducer;
 import subscribers.Subscriber;
 
 import java.io.*;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.function.Function;
 
+/*import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;*/
+
 public class DataProducerApplication {
-    /*public static final Logger log = LogManager.getLogger("ConsoleFile");*/
+    /*public static final Logger log = LogManager.getLogger(DataProducerApplication.class);*/
     private static final String IDENTITY_FILE_PATH = "configurations/identity.properties";
     private static Properties identity;
 
@@ -59,7 +63,16 @@ public class DataProducerApplication {
             } else if (argList.contains("--aws")){
                 ioTConnector = IoTConnectorFactory.create(IoTConnectorType.AMAZON_WEB_SERVICES);
             } else {
-                ioTConnector = IoTConnectorFactory.create(IoTConnectorType.KAFKA_PRODUCER);
+                if (argList.contains("--ip-address")){
+
+                    String[] param = new String[1];
+                    param[0] = argList.get(argList.indexOf("--ip-address") + 1);
+
+                    ioTConnector = IoTConnectorFactory.create(IoTConnectorType.KAFKA_PRODUCER, param);
+                }
+                 else {
+                    ioTConnector = IoTConnectorFactory.create(IoTConnectorType.KAFKA_PRODUCER);
+                 }
             }
 
             if (argList.contains("--debug")){
@@ -87,7 +100,7 @@ public class DataProducerApplication {
 
             Function<List<Map<String,String>>,String> composerFunction = (currentDataBus) -> {
                 // Se filtra el dataBus
-                List<Map<String, String>> dataFiltered = filterJustOneMessageByScheme(currentDataBus);
+                List<Map<String, String>> dataFiltered = filterJustOneGPSMessageByScheme(currentDataBus);
                 // Se compone el mensaje
                 return composeMessage(identity, dataFiltered);
             };
@@ -98,14 +111,14 @@ public class DataProducerApplication {
             ((BerkleyDBPersistentQueueFactory) persistentQueueFactory)
                     .setQueueEnvironmentPath("data-backups")
                     .setQueueName("IoTQueueBackup")
-                    .setCacheSize(10);
+                    .setCacheSize(0);
 
             PersistentQueue persistentQueue = persistentQueueFactory.create();
 
             // ------------------------------------------------------------------------TRANSMIT THE MESSAGE TO IOTSERVER
 
-            SubscriberFactory subscriberFactory = SubscriberAbsFactory.createFactory(SubscriberType.IOT_DATA_BUS_PUBLISHER);
-            ((IoTDataBusPublisherFactory) subscriberFactory)
+            SubscriberFactory subscriberFactory = SubscriberAbsFactory.createFactory(SubscriberType.EAGER_IOT_DATA_BUS_PUBLISHER);
+            ((EagerIoTDataBusPublisherFactory) subscriberFactory)
                     .setIoTConnector(ioTConnector)
                     .setTopic(argList.indexOf("--topic") != -1 ? argList.get(argList.indexOf("--topic") + 1): "data-producers-" + identity.getProperty("id"))
                     .setHandlerFunction(composerFunction)
@@ -121,21 +134,26 @@ public class DataProducerApplication {
         } catch (Exception e){
 
             e.printStackTrace();
-            System.out.println(e.getMessage());
+            System.out.println(Instant.now() + e.getMessage());
         }
     }
 
-    private static List<Map<String, String>> filterJustOneMessageByScheme(List<Map<String, String>> dataBusList) {
-        HashSet<String> schemesSet = new HashSet<>();
+    private static List<Map<String, String>> filterJustOneGPSMessageByScheme(List<Map<String, String>> dataBusList) {
         List<Map<String, String>> result = new LinkedList<>();
+        boolean gpsFlag = false;
 
-        dataBusList.forEach( (dataBus) -> {
-            if (dataBus.containsKey("data-scheme"))
-                if (!schemesSet.contains(dataBus.get("data-scheme"))){
+        for (Map<String,String> dataBus: dataBusList){
+            if (dataBus.containsKey("data-scheme")){
+                if (dataBus.get("data-scheme").equals("GPS")){
+                    if (!gpsFlag){
+                        result.add(dataBus);
+                        gpsFlag = true;
+                    }
+                } else {
                     result.add(dataBus);
-                    schemesSet.add(dataBus.get("data-scheme"));
                 }
-        });
+            }
+        }
 
         return result;
 
@@ -193,7 +211,7 @@ public class DataProducerApplication {
 
             }catch (Exception ex){
                 ex.printStackTrace();
-                System.out.println(ex.getMessage());
+                System.out.println(Instant.now() + ex.getMessage());
             }
         }
     }
