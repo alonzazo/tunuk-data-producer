@@ -49,6 +49,8 @@ public class BerkleyDBPersistentQueue implements PersistentQueue {
         }
 
     }
+
+
     @Override
     public String pollMessage() throws PersistentQueueException {
 
@@ -75,8 +77,29 @@ public class BerkleyDBPersistentQueue implements PersistentQueue {
         } catch (Exception e){
             throw new PersistentQueueException(e);
         }
+    }
 
 
+    @Override
+    public String peekMessage() throws PersistentQueueException {
+
+        try {
+            final DatabaseEntry key = new DatabaseEntry();
+            final DatabaseEntry data = new DatabaseEntry();
+
+            final Cursor cursor = queueDatabase.openCursor(null,null);
+            try {
+                cursor.getFirst(key, data, LockMode.RMW);
+                if (data.getData() == null)
+                    return null;
+
+                return new String(data.getData(), StandardCharsets.UTF_8);
+            } finally {
+                cursor.close();
+            }
+        } catch (Exception e){
+            throw new PersistentQueueException(e);
+        }
     }
 
     @Override

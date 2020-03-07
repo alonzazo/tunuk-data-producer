@@ -31,6 +31,11 @@ public class LocalPersistentQueue implements PersistentQueue {
 
     public void fetch(){}
 
+    @Override
+    public String peekMessage() throws PersistentQueueException {
+        return null;
+    }
+
     public void pushMessage(String message){
         // Se registra begin en LogBuffer
 
