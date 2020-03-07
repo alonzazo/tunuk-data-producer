@@ -3,6 +3,8 @@ package connectors.StandardOutputConnector;
 import connectors.IoTConnector;
 import connectors.IoTConnectorException;
 
+import java.time.Instant;
+
 public class StandardOutputConnector implements IoTConnector {
     @Override
     public void connect() throws IoTConnectorException {
@@ -19,7 +21,7 @@ public class StandardOutputConnector implements IoTConnector {
 
     @Override
     public void publish(String topic, String message) throws IoTConnectorException {
-        System.out.println("TOPIC: " + topic + "\nMESSAGE: \n" + message);
+        System.out.println(Instant.now() + " " + Thread.currentThread().getName() + "TOPIC: " + topic + "\nMESSAGE: \n" + message);
     }
 
     @Override

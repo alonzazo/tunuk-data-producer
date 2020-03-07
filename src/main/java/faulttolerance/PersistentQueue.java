@@ -9,6 +9,12 @@ public interface PersistentQueue {
     String pollMessage() throws PersistentQueueException;
 
     /**
+     * Get the first message from the queue
+     * @return message
+     */
+    String peekMessage() throws PersistentQueueException;
+
+    /**
      * Push the message to the queue
      * @param message
      */

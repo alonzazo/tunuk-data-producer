@@ -6,5 +6,7 @@ public enum DataProducerType {
     DELL_3003_MARINE_API,
     DELL_3003_RXTX,
     HONGDIAN_H8922S,
-    ADAFRUIT_ULTIMATE
+    ADAFRUIT_ULTIMATE,
+    TEST_GPS,
+    TEST_APC
 }

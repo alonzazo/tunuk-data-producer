@@ -37,18 +37,22 @@ public class MicrobatchDataBus implements DataBus {
 
     private List<Map<String, String>> getMergedData() {
         List<Map<String,String>> result = new LinkedList<>();
-        for (List<Map<String,String>> data: dataBus.values())
-            result.addAll(data);
+        synchronized (getDataBus()){
+            for (List<Map<String,String>> data: getDataBus().values())
+                result.addAll(data);
+        }
         return result;
     }
 
     @Override
     public synchronized void flush() {
-        for (List list:
-                dataBus.values()) {
-            list.clear();
+        synchronized (getDataBus()){
+            for (List list:
+                    getDataBus().values()) {
+                list.clear();
+            }
+            getDataBus().clear();
         }
-        dataBus.clear();
     }
 
     @Override
@@ -61,7 +65,7 @@ public class MicrobatchDataBus implements DataBus {
                     flush();
                     Thread.sleep(getInterval());
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    System.out.println(e.getMessage());
                 }
             }
 
@@ -72,13 +76,13 @@ public class MicrobatchDataBus implements DataBus {
 
     @Override
     public synchronized void publishData(Class<?> dataProducer, Map<String, String> data) {
-        List<Map<String, String>> dataBusFromDataDriver = dataBus.get(dataProducer);
+        List<Map<String, String>> dataBusFromDataDriver = getDataBus().get(dataProducer);
         if (dataBusFromDataDriver != null){
             dataBusFromDataDriver.add(data);
         } else {
             dataBusFromDataDriver = new LinkedList<>();
             dataBusFromDataDriver.add(data);
-            dataBus.put(dataProducer,dataBusFromDataDriver);
+            getDataBus().put(dataProducer,dataBusFromDataDriver);
         }
     }
 

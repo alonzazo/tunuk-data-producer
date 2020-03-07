@@ -9,6 +9,7 @@ import connectors.IoTConnectorException;
 import utils.SampleUtil;
 
 import java.io.FileInputStream;
+import java.time.Instant;
 import java.util.Properties;
 
 
@@ -95,12 +96,12 @@ public class AWSIoTConnector implements IoTConnector {
         AWSIotQos qos = AWSIotQos.QOS1;
         long timeout = 3000;                    // milliseconds
 
-        System.out.println("[MENSAJE] Por transmitirse: " + message);
+        System.out.println(Instant.now() + " " + Thread.currentThread().getName() + "[MENSAJE] Por transmitirse: " + message);
         MyMessage myMessage = new MyMessage(topic, qos, message);
 
         try {
             client.publish(myMessage, timeout);
-            System.out.println("[MENSAJE] Transmitido con éxito");
+            System.out.println(Instant.now() + " " + Thread.currentThread().getName() + "[MENSAJE] Transmitido con éxito");
         } catch (AWSIotException e) {
             throw new IoTConnectorException(e);
         }

@@ -9,20 +9,19 @@ import java.time.Instant;
 import java.util.Properties;
 
 
-public class KafkaProducerConnector implements IoTConnector {
+public class AsyncKafkaProducerConnector implements IoTConnector {
 
     private Producer<String, String> kafkaProducer;
     /*private String bootstrapServersConfig = "18.217.74.235:9092";*/
     /*private String bootstrapServersConfig = "52.87.66.174:9092";*/
-    private String bootstrapServersConfig;
+    private String bootstrapServersConfig = "3.221.246.97:9092";
     private String keySerializerClassConfig = "org.apache.kafka.common.serialization.ByteArraySerializer";
     private String valueSerializerClassConfig = "org.apache.kafka.common.serialization.StringSerializer";
 
-    public KafkaProducerConnector(){
-        bootstrapServersConfig = "3.221.246.97:9092";
+    public AsyncKafkaProducerConnector(){
     }
 
-    public KafkaProducerConnector(String bootstrapServers){
+    public AsyncKafkaProducerConnector(String bootstrapServers){
         this.bootstrapServersConfig = bootstrapServers;
     }
 
@@ -32,11 +31,13 @@ public class KafkaProducerConnector implements IoTConnector {
         configProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServersConfig);
         configProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, keySerializerClassConfig);
         configProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,valueSerializerClassConfig);
-        /*configProperties.put(ProducerConfig.RETRIES_CONFIG, 1000);
-        configProperties.put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, 1);
-        configProperties.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, 750);
-        configProperties.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, 500);*/
-        configProperties.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, 10000);
+        /*configProperties.put(ProducerConfig.RETRIES_CONFIG, 1);*/
+        /*configProperties.put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, 1);*/
+        /*configProperties.put(ProducerConfig.ACKS_CONFIG, "");*/
+        /*configProperties.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, 1000);*/
+        /*configProperties.put(ProducerConfig.LINGER_MS_CONFIG, 0);
+        configProperties.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, 1000);*/
+       /*configProperties.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, 10000);*/
         kafkaProducer = new KafkaProducer<>(configProperties);
     }
 
@@ -67,34 +68,34 @@ public class KafkaProducerConnector implements IoTConnector {
 
     @Override
     public void publish(String topic, String message) throws IoTConnectorException {
-        //Producer<String, String> kafkaProducer = null;
         try {
 
-            /*Properties configProperties = new Properties();
-            configProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServersConfig);
-            configProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, keySerializerClassConfig);
-            configProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,valueSerializerClassConfig);
-        *//*configProperties.put(ProducerConfig.RETRIES_CONFIG, 1000);
-        configProperties.put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, 1);
-        configProperties.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, 750);
-        configProperties.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, 500);*//*
-            configProperties.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, 10000);
 
-            kafkaProducer = new KafkaProducer<>(configProperties);*/
+            /*ProducerRecord<String, String> record = new ProducerRecord<>(topic, message);
+
+            kafkaProducer.send(record, (recordMetadata, e) -> {
+                if (recordMetadata != null) {
+                    System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [KAFKA_RESULT]: Message was received successfully: " + message);
+                } else {
+                    throw new RuntimeException(e);
+                }
+            });*/
+
+            Thread thread = new Thread(() -> {
+                try {
+                    ProducerRecord<String, String> record = new ProducerRecord<>(topic, message);
+                    RecordMetadata resultMetadata = kafkaProducer.send(record).get();
+
+                    System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " "+ Thread.currentThread().getName() + " [KAFKA_RESULT]: Message was received successfully: " + message);
 
 
-            ProducerRecord<String, String> record = new ProducerRecord<>(topic, message);
-            RecordMetadata resultMetadata = this.kafkaProducer.send(record).get();
-
-            /*kafkaProducer.close();*/
-
-
-            /*System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [KAFKA_RESULT]: Message was received successfully: " + message);*/
-            System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [KAFKA_RESULT]: Message was received successfully: " + message);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            thread.start();
 
         } catch (Exception e) {
-/*            if (kafkaProducer != null)
-                kafkaProducer.close();*/
             throw new IoTConnectorException(e);
         }
 

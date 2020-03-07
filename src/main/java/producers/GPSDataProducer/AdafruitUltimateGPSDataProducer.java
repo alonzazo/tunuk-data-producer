@@ -27,8 +27,8 @@ public class AdafruitUltimateGPSDataProducer implements DataProducer, SerialPort
     private EventBus EventBus;
 
     private static class DataProducerIdentity {
-        String brand = "Dell",
-                model= "3003",
+        String brand = "Adafruit",
+                model= "Flora/UltimateGPS",
                 serial="",
                 dataScheme="GPS",
                 controllerVersion="1.0";
@@ -105,8 +105,8 @@ public class AdafruitUltimateGPSDataProducer implements DataProducer, SerialPort
     public void startProduction() throws Exception {
 
         serialPort = new SerialPort(serialPortName);
-        System.out.println("Port opened: " + serialPort.openPort());
-        System.out.println("Params setted: " + serialPort.setParams(9600, 8, 1, 0));//Set params.
+        System.out.println(Instant.now() + " " + Thread.currentThread().getName() + "Port opened: " + serialPort.openPort());
+        System.out.println(Instant.now() + " " + Thread.currentThread().getName() + "Params setted: " + serialPort.setParams(9600, 8, 1, 0));//Set params.
         serialPort.addEventListener(this);//Add SerialPortEventListener
 
     }
@@ -149,7 +149,7 @@ public class AdafruitUltimateGPSDataProducer implements DataProducer, SerialPort
                 }
             }
             catch (SerialPortException ex) {
-                System.out.println(ex);
+                System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " " + ex);
             }
         }
         /*try {
@@ -251,7 +251,7 @@ public class AdafruitUltimateGPSDataProducer implements DataProducer, SerialPort
 
         }
         catch (DataNotAvailableException e){
-            System.out.println(Instant.now() + " [ EXCEPCION ]:               Datos no disponibles");
+            System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [ EXCEPCION ]:               Datos no disponibles");
         }
         catch (Exception ignored){
             //ignored.printStackTrace();

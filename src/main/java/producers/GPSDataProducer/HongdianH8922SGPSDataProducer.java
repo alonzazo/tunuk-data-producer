@@ -1,5 +1,6 @@
 package producers.GPSDataProducer;
 
+import eventbuses.EventBus;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.GGASentence;
 import net.sf.marineapi.nmea.sentence.GLLSentence;
@@ -7,11 +8,11 @@ import net.sf.marineapi.nmea.sentence.RMCSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.util.Position;
 import producers.DataProducer;
-import eventbuses.EventBus;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -112,12 +113,12 @@ public class HongdianH8922SGPSDataProducer implements DataProducer, Runnable {
                 Map<String,String> gpsData = new HashMap<>();
 
                 //Componemos los datos del GPS
-                System.out.println("***********************INTERPRETACION COMENZADA**********************");
+                System.out.println(Instant.now() + " " + Thread.currentThread().getName() + "***********************INTERPRETACION COMENZADA**********************");
 
                 Map<String, String> lineParsed = parseNMEASentence(incomingString);
                 if (lineParsed.size() != 0){
                     gpsData.putAll(lineParsed);
-                    System.out.println("-----------------------------------INTERPRETACION CORRECTA\nLÍNEA CRUDA GPS: \n" + incomingString + "\nLÍNEA INTERPRETADA GPS:\n" + lineParsed.toString() + "\n----------------------------------");
+                    System.out.println(Instant.now() + " " + Thread.currentThread().getName() + "-----------------------------------INTERPRETACION CORRECTA\nLÍNEA CRUDA GPS: \n" + incomingString + "\nLÍNEA INTERPRETADA GPS:\n" + lineParsed.toString() + "\n----------------------------------");
                 }
 
                 if (gpsData.size() != 0){
@@ -126,13 +127,13 @@ public class HongdianH8922SGPSDataProducer implements DataProducer, Runnable {
                     // Publicamos los datos en el bus de datos
                     EventBus.publishData(this.getClass(), gpsData);
                 } else {
-                    System.out.println("No se agregó datos GPS al EventBus");
+                    System.out.println(Instant.now() + " " + Thread.currentThread().getName() + "No se agregó datos GPS al EventBus");
                 }
-                System.out.println("******************INTERPRETACION FINALIZADA**************************");
+                System.out.println(Instant.now() + " " + Thread.currentThread().getName() + "******************INTERPRETACION FINALIZADA**************************");
             }
 
             catch (Exception ex) {
-                System.out.println(ex.getMessage());
+                System.out.println(Instant.now() + ex.getMessage());
             }
 
             try {
@@ -157,7 +158,7 @@ public class HongdianH8922SGPSDataProducer implements DataProducer, Runnable {
 
         String messageReceived = new String(data);
 
-        System.out.println("Mensaje recibido del H8922S:\n" + messageReceived);
+        System.out.println(Instant.now() + " " + Thread.currentThread().getName() + "Mensaje recibido del H8922S:\n" + messageReceived);
 
         return messageReceived;
     }
@@ -179,7 +180,7 @@ public class HongdianH8922SGPSDataProducer implements DataProducer, Runnable {
             Sentence sentence = sentenceFactory.createParser(line);
 
             if (sentence instanceof GGASentence){
-                System.out.println(line + " -> GGA ENCONTRADA");
+                System.out.println(Instant.now() + line + " -> GGA ENCONTRADA");
                 GGASentence ggaSentence = (GGASentence) sentence;
 
                 Position position = ggaSentence.getPosition();
@@ -188,7 +189,7 @@ public class HongdianH8922SGPSDataProducer implements DataProducer, Runnable {
                 result.put("longitude", String.valueOf(position.getLongitude()));
                 result.put("altitude", String.valueOf(position.getAltitude()));
             } else if (sentence instanceof GLLSentence){
-                System.out.println(line + " -> GLL ENCONTRADA");
+                System.out.println(Instant.now() + line + " -> GLL ENCONTRADA");
                 GLLSentence gllSentence = (GLLSentence) sentence;
                 Position position = gllSentence.getPosition();
 
@@ -196,7 +197,7 @@ public class HongdianH8922SGPSDataProducer implements DataProducer, Runnable {
                 result.put("longitude", String.valueOf(position.getLongitude()));
                 result.put("altitude", String.valueOf(position.getAltitude()));
             } else if (sentence instanceof RMCSentence){
-                System.out.println(line + " -> RMC ENCONTRADA");
+                System.out.println(Instant.now() + line + " -> RMC ENCONTRADA");
                 RMCSentence rmcSentence = (RMCSentence) sentence;
                 Position position = rmcSentence.getPosition();
 
@@ -223,12 +224,12 @@ public class HongdianH8922SGPSDataProducer implements DataProducer, Runnable {
                 } catch (Exception ignored){}
             }
             else {
-                System.out.println(line + " -> FORMATO NO IDENTIFICADO");
+                System.out.println(Instant.now() + line + " -> FORMATO NO IDENTIFICADO");
             }
 
         } catch (Exception ignored){
             ignored.printStackTrace();
-            System.out.println(ignored.getMessage());
+            System.out.println(Instant.now() + ignored.getMessage());
         }
         return result;
     }

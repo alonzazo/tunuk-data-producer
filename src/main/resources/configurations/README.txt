@@ -22,3 +22,11 @@ databus.interval=1000
 
 HONGDIAN_H8922S
 producer.port=2502
+
+TEST_GPS
+databus.mode=microbatch
+databus.interval=1000
+
+TEST_APC
+databus.mode=microbatch
+databus.interval=1000
