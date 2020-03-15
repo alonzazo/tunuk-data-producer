@@ -1,0 +1,400 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<serializableDeviceManagerImpl xmlns:ns2="http://www.aglaia-gmbh.de/xml/2013/05/17/BaSS_SOAPd.xsd" versionMajor="1" versionMinor="0">
+    <managedDevices>
+        <entry>
+            <key>00:0B:91:01:30:6D</key>
+            <value>
+                <firstServerTaskID>1</firstServerTaskID>
+                <nextServerTaskID>3</nextServerTaskID>
+                <macAddress>00:0B:91:01:30:6D</macAddress>
+                <subscriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="serializableAliveSubscriptionImpl">
+                    <serverTaskID>1</serverTaskID>
+                    <taskType>ALIVE</taskType>
+                    <taskState>
+                        <taskState>PENDING</taskState>
+                    </taskState>
+                    <errorReason>SOAP_DEVICE_OK</errorReason>
+                    <backendTrigger>
+                        <ns2:time_trigger>
+                            <ns2:date kind="DATE_DONT_CARE" day_of_week="MONDAY" day_of_month="0"/>
+                            <ns2:start hours="0" minutes="0" seconds="0"/>
+                            <ns2:cycle>P0Y0M0DT0H1M0.000S</ns2:cycle>
+                            <ns2:random_offset>P0Y0M0DT0H0M0.000S</ns2:random_offset>
+                        </ns2:time_trigger>
+                    </backendTrigger>
+                </subscriptions>
+                <subscriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="serializableAliveSubscriptionImpl">
+                    <serverTaskID>2</serverTaskID>
+                    <taskType>ALIVE</taskType>
+                    <taskState>
+                        <taskState>PENDING</taskState>
+                    </taskState>
+                    <errorReason>SOAP_DEVICE_OK</errorReason>
+                    <backendTrigger>
+                        <ns2:time_trigger>
+                            <ns2:date kind="DATE_DONT_CARE" day_of_week="MONDAY" day_of_month="0"/>
+                            <ns2:start hours="0" minutes="0" seconds="0"/>
+                            <ns2:cycle>P0Y0M0DT0H11M0.000S</ns2:cycle>
+                            <ns2:random_offset>P0Y0M0DT0H5M0.000S</ns2:random_offset>
+                        </ns2:time_trigger>
+                    </backendTrigger>
+                </subscriptions>
+                <isActive>false</isActive>
+            </value>
+        </entry>
+        <entry>
+            <key>00:0B:91:01:31:AA</key>
+            <value>
+                <firstServerTaskID>1</firstServerTaskID>
+                <nextServerTaskID>9</nextServerTaskID>
+                <startupNotification reboot_type="SOAP_REBOOT_POWERON" xml_version="http://www.aglaia-gmbh.de/xml/2013/05/17/BaSS_SOAPd.xsd" ip_address="192.168.100.110" customer_version="none" notification_ID="11000" serverTask_ID="0" timestamp="2045-02-06T08:46:40.000+01:00" mac_address="00:0B:91:01:31:AA" customer_ID="1"/>
+                <macAddress>00:0B:91:01:31:AA</macAddress>
+                <subscriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="serializableAliveSubscriptionImpl">
+                    <serverTaskID>1</serverTaskID>
+                    <taskType>ALIVE</taskType>
+                    <taskState>
+                        <taskState>ACTIVE</taskState>
+                    </taskState>
+                    <errorReason>SOAP_DEVICE_OK</errorReason>
+                    <backendTrigger>
+                        <ns2:time_trigger>
+                            <ns2:date kind="DATE_DONT_CARE" day_of_week="MONDAY" day_of_month="0"/>
+                            <ns2:start hours="0" minutes="0" seconds="0"/>
+                            <ns2:cycle>P0Y0M0DT0H1M0.000S</ns2:cycle>
+                            <ns2:random_offset>P0Y0M0DT0H0M0.000S</ns2:random_offset>
+                        </ns2:time_trigger>
+                    </backendTrigger>
+                </subscriptions>
+                <subscriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="serializableCountSubscriptionImpl">
+                    <serverTaskID>2</serverTaskID>
+                    <taskType>COUNTING</taskType>
+                    <taskState>
+                        <taskState>ACTIVE</taskState>
+                    </taskState>
+                    <errorReason>SOAP_DEVICE_OK</errorReason>
+                    <backendTrigger>
+                        <ns2:event_trigger>
+                            <ns2:count_event count_event_type="COUNT_EVENT_ALWAYS" delta="0"/>
+                        </ns2:event_trigger>
+                    </backendTrigger>
+                    <isBuffering>true</isBuffering>
+                    <countingGateID>Counting-gate-AOI0</countingGateID>
+                </subscriptions>
+                <subscriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="serializableFillLevelSubscriptionImpl">
+                    <serverTaskID>3</serverTaskID>
+                    <taskType>FILL_LEVEL</taskType>
+                    <taskState>
+                        <taskState>ACTIVE</taskState>
+                    </taskState>
+                    <errorReason>SOAP_DEVICE_OK</errorReason>
+                    <backendTrigger>
+                        <ns2:event_trigger>
+                            <ns2:fill_event fill_event_type="FILL_EVENT_ANY" threshold="1"/>
+                        </ns2:event_trigger>
+                    </backendTrigger>
+                    <isBuffering>true</isBuffering>
+                    <fillLevelGateID>Fill-gate-AOI0</fillLevelGateID>
+                </subscriptions>
+                <subscriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="serializableDigitalInputSubscriptionImpl">
+                    <serverTaskID>4</serverTaskID>
+                    <taskType>DIGIT_INPUT</taskType>
+                    <taskState>
+                        <taskState>ACTIVE</taskState>
+                    </taskState>
+                    <errorReason>SOAP_DEVICE_OK</errorReason>
+                    <backendTrigger>
+                        <ns2:event_trigger>
+                            <ns2:digital_input_event>
+<ns2:event>DIGITAL_INPUT_EVENT_ANY</ns2:event>
+<ns2:event>DIGITAL_INPUT_EVENT_ANY</ns2:event>
+<ns2:event>DIGITAL_INPUT_EVENT_ANY</ns2:event>
+<ns2:event>DIGITAL_INPUT_EVENT_ANY</ns2:event>
+                            </ns2:digital_input_event>
+                        </ns2:event_trigger>
+                    </backendTrigger>
+                    <isBuffering>true</isBuffering>
+                    <activityStateMask>15</activityStateMask>
+                </subscriptions>
+                <subscriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="serializableItemInformationSubscriptionImpl">
+                    <serverTaskID>5</serverTaskID>
+                    <taskType>CURRENT_OBJECT_LIST</taskType>
+                    <taskState>
+                        <taskState>ACTIVE</taskState>
+                    </taskState>
+                    <errorReason>SOAP_DEVICE_OK</errorReason>
+                    <backendTrigger>
+                        <ns2:event_trigger>
+                            <ns2:current_object_list_event skip="1000"/>
+                        </ns2:event_trigger>
+                    </backendTrigger>
+                    <transferType>INLINE</transferType>
+                </subscriptions>
+                <subscriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="serializableItemInformationSubscriptionImpl">
+                    <serverTaskID>6</serverTaskID>
+                    <taskType>HISTORIC_OBJECT_LIST</taskType>
+                    <taskState>
+                        <taskState>ACTIVE</taskState>
+                    </taskState>
+                    <errorReason>SOAP_DEVICE_OK</errorReason>
+                    <backendTrigger>
+                        <ns2:event_trigger>
+                            <ns2:current_object_list_event skip="1000"/>
+                        </ns2:event_trigger>
+                    </backendTrigger>
+                    <transferType>BINARY</transferType>
+                </subscriptions>
+                <subscriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="serializableClearZoneSubscriptionImpl">
+                    <serverTaskID>7</serverTaskID>
+                    <taskType>CLEAR_ZONE</taskType>
+                    <taskState>
+                        <taskState>ACTIVE</taskState>
+                    </taskState>
+                    <errorReason>SOAP_DEVICE_OK</errorReason>
+                    <backendTrigger>
+                        <ns2:event_trigger>
+                            <ns2:clear_zone_event clear_zone_event_type="CLEAR_ZONE_EVENT_ANY"/>
+                        </ns2:event_trigger>
+                    </backendTrigger>
+                    <isBuffering>false</isBuffering>
+                    <clearZoneID>clear-1010</clearZoneID>
+                </subscriptions>
+                <subscriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="serializableAliveSubscriptionImpl">
+                    <serverTaskID>8</serverTaskID>
+                    <taskType>ALIVE</taskType>
+                    <taskState>
+                        <taskState>ACTIVE</taskState>
+                    </taskState>
+                    <errorReason>SOAP_DEVICE_OK</errorReason>
+                    <backendTrigger>
+                        <ns2:time_trigger>
+                            <ns2:date kind="DATE_DONT_CARE" day_of_week="MONDAY" day_of_month="0"/>
+                            <ns2:start hours="0" minutes="0" seconds="0"/>
+                            <ns2:cycle>P0Y0M0DT0H11M0.000S</ns2:cycle>
+                            <ns2:random_offset>P0Y0M0DT0H5M0.000S</ns2:random_offset>
+                        </ns2:time_trigger>
+                    </backendTrigger>
+                </subscriptions>
+                <lastContact>2013-05-31T00:00:00-06:00</lastContact>
+                <isActive>true</isActive>
+            </value>
+        </entry>
+    </managedDevices>
+    <rejectAll>false</rejectAll>
+    <whiteList>00:0B:91:01:30:6D</whiteList>
+    <whiteList>00:0B:91:01:31:AA</whiteList>
+    <blackList>00:0B:91:01:30:6E</blackList>
+    <applications>
+        <entry>
+            <key>Proxy-App</key>
+            <value>
+                <applicationDeviceMap>
+                    <entry>
+                        <key>00:0B:91:01:30:6D</key>
+                        <value>
+                            <subscriptionIDs>1</subscriptionIDs>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>00:0B:91:01:31:AA</key>
+                        <value>
+                            <subscriptionIDs>1</subscriptionIDs>
+                            <subscriptionIDs>2</subscriptionIDs>
+                            <subscriptionIDs>3</subscriptionIDs>
+                            <subscriptionIDs>4</subscriptionIDs>
+                            <subscriptionIDs>5</subscriptionIDs>
+                            <subscriptionIDs>6</subscriptionIDs>
+                            <subscriptionIDs>7</subscriptionIDs>
+                        </value>
+                    </entry>
+                </applicationDeviceMap>
+                <subscriptionManager>
+                    <subscriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="serializableAliveSubscriptionImpl">
+                        <serverTaskID>-1</serverTaskID>
+                        <taskType>ALIVE</taskType>
+                        <taskState>
+                            <taskState>PENDING</taskState>
+                        </taskState>
+                        <errorReason>SOAP_DEVICE_OK</errorReason>
+                        <backendTrigger>
+                            <ns2:time_trigger>
+<ns2:date kind="DATE_DONT_CARE" day_of_week="MONDAY" day_of_month="0"/>
+<ns2:start hours="0" minutes="0" seconds="0"/>
+<ns2:cycle>P0Y0M0DT0H1M0.000S</ns2:cycle>
+<ns2:random_offset>P0Y0M0DT0H0M0.000S</ns2:random_offset>
+                            </ns2:time_trigger>
+                        </backendTrigger>
+                    </subscriptions>
+                    <subscriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="serializableCountSubscriptionImpl">
+                        <serverTaskID>-1</serverTaskID>
+                        <taskType>COUNTING</taskType>
+                        <taskState>
+                            <taskState>PENDING</taskState>
+                        </taskState>
+                        <errorReason>SOAP_DEVICE_OK</errorReason>
+                        <backendTrigger>
+                            <ns2:event_trigger>
+<ns2:count_event count_event_type="COUNT_EVENT_ALWAYS" delta="0"/>
+                            </ns2:event_trigger>
+                        </backendTrigger>
+                        <isBuffering>true</isBuffering>
+                        <countingGateID>Counting-gate-AOI0</countingGateID>
+                    </subscriptions>
+                    <subscriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="serializableFillLevelSubscriptionImpl">
+                        <serverTaskID>-1</serverTaskID>
+                        <taskType>FILL_LEVEL</taskType>
+                        <taskState>
+                            <taskState>PENDING</taskState>
+                        </taskState>
+                        <errorReason>SOAP_DEVICE_OK</errorReason>
+                        <backendTrigger>
+                            <ns2:event_trigger>
+<ns2:fill_event fill_event_type="FILL_EVENT_ANY" threshold="1"/>
+                            </ns2:event_trigger>
+                        </backendTrigger>
+                        <isBuffering>true</isBuffering>
+                        <fillLevelGateID>Fill-gate-AOI0</fillLevelGateID>
+                    </subscriptions>
+                    <subscriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="serializableDigitalInputSubscriptionImpl">
+                        <serverTaskID>-1</serverTaskID>
+                        <taskType>DIGIT_INPUT</taskType>
+                        <taskState>
+                            <taskState>PENDING</taskState>
+                        </taskState>
+                        <errorReason>SOAP_DEVICE_OK</errorReason>
+                        <backendTrigger>
+                            <ns2:event_trigger>
+<ns2:digital_input_event>
+    <ns2:event>DIGITAL_INPUT_EVENT_ANY</ns2:event>
+    <ns2:event>DIGITAL_INPUT_EVENT_ANY</ns2:event>
+    <ns2:event>DIGITAL_INPUT_EVENT_ANY</ns2:event>
+    <ns2:event>DIGITAL_INPUT_EVENT_ANY</ns2:event>
+</ns2:digital_input_event>
+                            </ns2:event_trigger>
+                        </backendTrigger>
+                        <isBuffering>true</isBuffering>
+                        <activityStateMask>15</activityStateMask>
+                    </subscriptions>
+                    <subscriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="serializableItemInformationSubscriptionImpl">
+                        <serverTaskID>-1</serverTaskID>
+                        <taskType>CURRENT_OBJECT_LIST</taskType>
+                        <taskState>
+                            <taskState>PENDING</taskState>
+                        </taskState>
+                        <errorReason>SOAP_DEVICE_OK</errorReason>
+                        <backendTrigger>
+                            <ns2:event_trigger>
+<ns2:current_object_list_event skip="1000"/>
+                            </ns2:event_trigger>
+                        </backendTrigger>
+                        <transferType>INLINE</transferType>
+                    </subscriptions>
+                    <subscriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="serializableItemInformationSubscriptionImpl">
+                        <serverTaskID>-1</serverTaskID>
+                        <taskType>HISTORIC_OBJECT_LIST</taskType>
+                        <taskState>
+                            <taskState>PENDING</taskState>
+                        </taskState>
+                        <errorReason>SOAP_DEVICE_OK</errorReason>
+                        <backendTrigger>
+                            <ns2:event_trigger>
+<ns2:current_object_list_event skip="1000"/>
+                            </ns2:event_trigger>
+                        </backendTrigger>
+                        <transferType>BINARY</transferType>
+                    </subscriptions>
+                    <subscriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="serializableClearZoneSubscriptionImpl">
+                        <serverTaskID>-1</serverTaskID>
+                        <taskType>CLEAR_ZONE</taskType>
+                        <taskState>
+                            <taskState>PENDING</taskState>
+                        </taskState>
+                        <errorReason>SOAP_DEVICE_OK</errorReason>
+                        <backendTrigger>
+                            <ns2:event_trigger>
+<ns2:clear_zone_event clear_zone_event_type="CLEAR_ZONE_EVENT_ANY"/>
+                            </ns2:event_trigger>
+                        </backendTrigger>
+                        <isBuffering>false</isBuffering>
+                        <clearZoneID>clear-1010</clearZoneID>
+                    </subscriptions>
+                </subscriptionManager>
+            </value>
+        </entry>
+        <entry>
+            <key>counting-sub</key>
+            <value>
+                <applicationDeviceMap/>
+                <subscriptionManager>
+                    <subscriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="serializableAliveSubscriptionImpl">
+                        <serverTaskID>-1</serverTaskID>
+                        <taskType>ALIVE</taskType>
+                        <taskState>
+                            <taskState>PENDING</taskState>
+                        </taskState>
+                        <errorReason>SOAP_DEVICE_OK</errorReason>
+                        <backendTrigger>
+                            <ns2:time_trigger>
+<ns2:date kind="DATE_DONT_CARE" day_of_week="MONDAY" day_of_month="0"/>
+<ns2:start hours="0" minutes="0" seconds="0"/>
+<ns2:cycle>P0Y0M0DT0H5M0.000S</ns2:cycle>
+<ns2:random_offset>P0Y0M0DT0H1M0.000S</ns2:random_offset>
+                            </ns2:time_trigger>
+                        </backendTrigger>
+                    </subscriptions>
+                    <subscriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="serializableCountSubscriptionImpl">
+                        <serverTaskID>-1</serverTaskID>
+                        <taskType>COUNTING</taskType>
+                        <taskState>
+                            <taskState>PENDING</taskState>
+                        </taskState>
+                        <errorReason>SOAP_DEVICE_OK</errorReason>
+                        <backendTrigger>
+                            <ns2:event_trigger>
+<ns2:count_event count_event_type="COUNT_EVENT_ALWAYS" delta="0"/>
+                            </ns2:event_trigger>
+                        </backendTrigger>
+                        <isBuffering>true</isBuffering>
+                        <countingGateID>counting-sub</countingGateID>
+                    </subscriptions>
+                </subscriptionManager>
+            </value>
+        </entry>
+        <entry>
+            <key>Logger-App</key>
+            <value>
+                <applicationDeviceMap>
+                    <entry>
+                        <key>00:0B:91:01:30:6D</key>
+                        <value>
+                            <subscriptionIDs>2</subscriptionIDs>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>00:0B:91:01:31:AA</key>
+                        <value>
+                            <subscriptionIDs>8</subscriptionIDs>
+                        </value>
+                    </entry>
+                </applicationDeviceMap>
+                <subscriptionManager>
+                    <subscriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="serializableAliveSubscriptionImpl">
+                        <serverTaskID>-1</serverTaskID>
+                        <taskType>ALIVE</taskType>
+                        <taskState>
+                            <taskState>PENDING</taskState>
+                        </taskState>
+                        <errorReason>SOAP_DEVICE_OK</errorReason>
+                        <backendTrigger>
+                            <ns2:time_trigger>
+<ns2:date kind="DATE_DONT_CARE" day_of_week="MONDAY" day_of_month="0"/>
+<ns2:start hours="0" minutes="0" seconds="0"/>
+<ns2:cycle>P0Y0M0DT0H11M0.000S</ns2:cycle>
+<ns2:random_offset>P0Y0M0DT0H5M0.000S</ns2:random_offset>
+                            </ns2:time_trigger>
+                        </backendTrigger>
+                    </subscriptions>
+                </subscriptionManager>
+            </value>
+        </entry>
+    </applications>
+</serializableDeviceManagerImpl>

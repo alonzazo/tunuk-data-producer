@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class MicrobatchDataBus implements DataBus {
 
-    private Map<Class<?>, List<Map<String,String>>> dataBus;
+    private Map<Class<?>, List<Map<String, String>>> dataBus;
     private List<Subscriber> subscribers;
     private long interval;
 
@@ -26,43 +26,43 @@ public class MicrobatchDataBus implements DataBus {
     }
 
     @Override
-    public synchronized long getInterval() {
+    public long getInterval() {
         return interval;
     }
 
     @Override
-    public synchronized Map<Class<?>, List<Map<String, String>>> getDataBus() {
+    public Map<Class<?>, List<Map<String, String>>> getDataBus() {
         return dataBus;
     }
 
     private List<Map<String, String>> getMergedData() {
-        List<Map<String,String>> result = new LinkedList<>();
-        synchronized (getDataBus()){
-            for (List<Map<String,String>> data: getDataBus().values())
+        List<Map<String, String>> result = new LinkedList<>();
+            for (List<Map<String, String>> data : getDataBus().values())
                 result.addAll(data);
-        }
         return result;
     }
 
     @Override
-    public synchronized void flush() {
-        synchronized (getDataBus()){
-            for (List list:
-                    getDataBus().values()) {
-                list.clear();
-            }
-            getDataBus().clear();
+    public void flush() {
+        for (List list :
+                getDataBus().values()) {
+            list.clear();
         }
+        getDataBus().clear();
     }
 
     @Override
     public synchronized void startPublication() {
+
         Thread thread = new Thread(() -> {
 
-            while (true){
+            while (true) {
                 try {
-                    subscribers.forEach(subscriber -> subscriber.handleDataBus(getMergedData()));
-                    flush();
+                    synchronized (this) {
+                        List<Map<String, String>> mergedData = getMergedData();
+                        subscribers.forEach(subscriber -> subscriber.handleDataBus(mergedData));
+                        flush();
+                    }
                     Thread.sleep(getInterval());
                 } catch (InterruptedException e) {
                     System.out.println(e.getMessage());
@@ -71,24 +71,31 @@ public class MicrobatchDataBus implements DataBus {
 
         });
 
+        thread.setName(String.format("microbatch-%d-ms-thread", getInterval()));
+
         thread.start();
     }
 
     @Override
     public synchronized void publishData(Class<?> dataProducer, Map<String, String> data) {
-        List<Map<String, String>> dataBusFromDataDriver = getDataBus().get(dataProducer);
-        if (dataBusFromDataDriver != null){
-            dataBusFromDataDriver.add(data);
-        } else {
-            dataBusFromDataDriver = new LinkedList<>();
-            dataBusFromDataDriver.add(data);
-            getDataBus().put(dataProducer,dataBusFromDataDriver);
+        synchronized (this) {
+            List<Map<String, String>> dataBusFromDataDriver = getDataBus().get(dataProducer);
+            if (dataBusFromDataDriver != null) {
+                dataBusFromDataDriver.add(data);
+            } else {
+                dataBusFromDataDriver = new LinkedList<>();
+                dataBusFromDataDriver.add(data);
+                getDataBus().put(dataProducer, dataBusFromDataDriver);
+            }
         }
     }
 
     @Override
     public synchronized void subscribe(Subscriber subscriber) {
-        subscribers.add(subscriber);
+        synchronized (this){
+            subscribers.add(subscriber);
+        }
+
     }
 
     @Override

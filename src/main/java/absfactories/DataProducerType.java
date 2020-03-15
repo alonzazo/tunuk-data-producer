@@ -2,6 +2,7 @@ package absfactories;
 
 public enum DataProducerType {
     HELLA_APC_ECO_RS485,
+    HELLA_PUSH_NOTIFICATION,
     DELL_3003_ARCGIS,
     DELL_3003_MARINE_API,
     DELL_3003_RXTX,

@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 public class EagerIoTDataBusPublisher implements Subscriber {
@@ -20,22 +19,17 @@ public class EagerIoTDataBusPublisher implements Subscriber {
     private String topic;
     private PersistentQueue persistentQueue;
     private ExecutorService executor = Executors.newFixedThreadPool(100);
-    private AtomicBoolean connected;
 
     public EagerIoTDataBusPublisher(IoTConnector ioTConnector, String topic, Function<List<Map<String, String>>, String> handlerFunction) {
         this.ioTConnector = ioTConnector;
         this.handlerFunction = handlerFunction;
         this.topic = topic;
-        this.connected = new AtomicBoolean(false);
     }
 
     public EagerIoTDataBusPublisher(IoTConnector ioTConnector, String topic, Function<List<Map<String, String>>, String> handlerFunction, int sleepTime) {
         this.ioTConnector = ioTConnector;
         this.handlerFunction = handlerFunction;
         this.topic = topic;
-        this.connected = new AtomicBoolean(false);
-
-
     }
 
     public EagerIoTDataBusPublisher(IoTConnector ioTConnector, String topic, Function<List<Map<String, String>>, String> handlerFunction, PersistentQueue persistentQueue) {
@@ -46,43 +40,51 @@ public class EagerIoTDataBusPublisher implements Subscriber {
 
         Thread senderService = new Thread(() -> {
 
-            long size = getPersistentQueue().size();
+            String inflightMessage = null;
 
             while (true) {
 
-                if (size > 0) {
+                synchronized (getPersistentQueue()) {
 
                     try {
-                        String inflightMessage = getPersistentQueue().peekMessage();
+                        inflightMessage = getPersistentQueue().peekMessage();
+                    } catch (PersistentQueueException ex) {
+                        System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [EXCEPCION]: No se pudo sacar datos de la cola: " + ex.getMessage());
+                    }
 
-                        if (inflightMessage == null)
-                            continue;
+                }
+
+                if (inflightMessage != null) {
+                    try {
+
+                        long size = -1;
 
                         long startTime = System.currentTimeMillis();
 
                         ioTConnector.publish(this.topic, inflightMessage);
 
-                        getPersistentQueue().pollMessage();
+                        synchronized (getPersistentQueue()) {
+                            getPersistentQueue().pollMessage();
+                            size = getPersistentQueue().size();
+                        }
 
                         long finishTime = System.currentTimeMillis();
 
                         long duration = finishTime - startTime;
 
-                        System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: Mensaje enviado, recibido y quitado de cola exitosamente en " + duration + "ms. Tamaño de cola: " + getPersistentQueue().size() + ": " + inflightMessage);
+                        System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: Mensaje enviado, recibido y quitado de cola exitosamente en " + duration + "ms. Tamaño de cola: " + size + ": " + inflightMessage);
 
                     } catch (PersistentQueueException ex) {
                         System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [EXCEPCION]: No se pudo sacar datos de la cola: " + ex.getMessage());
                     } catch (IoTConnectorException ex) {
-                        System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [EXCEPCION]: Mensaje no enviado, revise su conexión");
+                        System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [EXCEPCION]: Fallo en la conexión. Mensaje sensible no enviado, se mantiene en cola de respaldo.");
                     }
-
                 }
-
-                size = getPersistentQueue().size();
 
             }
         });
 
+        senderService.setName("eager-publisher-thread");
         senderService.start();
     }
 
@@ -95,47 +97,21 @@ public class EagerIoTDataBusPublisher implements Subscriber {
 
         if (message.contains("APC")) {
             try {
+
+                long size = -1;
                 // Se coloca en la cola
-                getPersistentQueue().pushMessage(message);
-                System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: Mensaje sensible guardado con éxito: " + getPersistentQueue().size() + ": " + message);
+                synchronized (getPersistentQueue()) {
+                    getPersistentQueue().pushMessage(message);
+                    size = getPersistentQueue().size();
+                }
+
+                System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: Mensaje sensible guardado con éxito: " + size + ": " + message);
             } catch (PersistentQueueException ex) {
                 System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [EXCEPCION]: No se pudo guardar el mensaje en la cola de respaldo: " + ex.getMessage() + message);
             }
         } else {
             sendMessageAsAThread(message);
         }
-
-
-        /*
-        String message = handlerFunction.apply(data);
-
-        sendMessageAsAThread(message);
-
-        if (connected.get()) {
-
-            long size = persistentQueue.size();
-
-            try {
-                while (size > 0) {
-
-                    System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: Se han encontrado " + size + " mensajes en cola de respaldo -> Intentando retransmitir...");
-
-                    String messageOld = "";
-
-                    messageOld = persistentQueue.pollMessage();
-
-                    sendMessageAsAThread(messageOld);
-
-                    size = persistentQueue.size();
-
-                    if (!connected.get()) break;
-
-                }
-            } catch (PersistentQueueException e) {
-                System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [EXCEPCIÓN] No se logró extraer o guardar mensaje de cola de respaldo ");
-            }
-        }*/
-
 
     }
 
@@ -159,7 +135,7 @@ public class EagerIoTDataBusPublisher implements Subscriber {
         });
     }
 
-    private synchronized PersistentQueue getPersistentQueue() {
+    private PersistentQueue getPersistentQueue() {
         return this.persistentQueue;
     }
 
