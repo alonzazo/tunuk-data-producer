@@ -8,6 +8,8 @@ import faulttolerance.PersistentQueueException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
@@ -18,6 +20,7 @@ public class IoTDataBusPublisher implements Subscriber {
     private String topic;
     private PersistentQueue persistentQueue;
     private AtomicBoolean connected;
+    private ExecutorService executor = Executors.newFixedThreadPool(100);
 
     public IoTDataBusPublisher(IoTConnector ioTConnector, String topic, Function<List<Map<String, String>>, String> handlerFunction) {
         this.ioTConnector = ioTConnector;
@@ -50,26 +53,32 @@ public class IoTDataBusPublisher implements Subscriber {
 
         if (connected.get()) {
 
-            long size = persistentQueue.size();
+            String messageOld = "";
+
+            long size = -1;
 
             try {
-                while (size > 0) {
 
-                    System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: Se han encontrado " + size + " mensajes en cola de respaldo -> Intentando retransmitir...");
+                synchronized (getPersistentQueue()){
+                    messageOld = getPersistentQueue().pollMessage();
+                    size = getPersistentQueue().size();
+                }
 
-                    String messageOld = "";
+                System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: Se han encontrado " + size + " mensajes en cola de respaldo -> Intentando retransmitir...");
 
-                    messageOld = persistentQueue.pollMessage();
+                while (messageOld != null) {
 
                     sendMessageAsAThread(messageOld);
 
-                    size = persistentQueue.size();
+                    synchronized (getPersistentQueue()){
+                        messageOld = getPersistentQueue().pollMessage();
+                    }
 
                     if (!connected.get()) break;
 
                 }
             } catch (PersistentQueueException e) {
-                System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [EXCEPCIÓN] No se logró extraer o guardar mensaje de cola de respaldo ");
+                System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [EXCEPCIÓN]: No se logró extraer o guardar mensaje de cola de respaldo ");
             }
         }
 
@@ -77,30 +86,34 @@ public class IoTDataBusPublisher implements Subscriber {
     }
 
     private void sendMessageAsAThread(String message) {
-        Thread thread = new Thread(() -> {
+        executor.execute(() -> {
 
             try {
 
                 ioTConnector.publish(topic, message);
 
-                connected.compareAndSet(false, true);
+                connected.set(true);
 
-                System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [MESSAGE_SENT]: " + message);
+                System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: Mensaje enviado con éxito: " + message);
 
             } catch (IoTConnectorException e) {
 
-                connected.compareAndSet(true, false);
+                connected.set(false);
 
                 System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: Fallo en la conexión -> Intentando guardar en cola de respaldo...");
                 try {
                     if (message.contains("APC")) {
+                        long size = -1;
 
-                        persistentQueue.pushMessage(message);
+                        synchronized (getPersistentQueue()){
+                            getPersistentQueue().pushMessage(message);
+                            size = getPersistentQueue().size();
+                        }
 
-                        System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE] Tamaño de cola de respaldo: " + persistentQueue.size() + ": Mensaje con dato sensible: Guardado con éxito: " + message);
+                        System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: Mensaje sensible " + size + " guardado con éxito: " + message);
 
                     } else {
-                        System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE] Mensaje dispensable, no se guardó: " + message);
+                        System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: Mensaje dispensable, no se guardó: " + message);
                     }
 
                 } catch (Exception exception) {
@@ -115,8 +128,10 @@ public class IoTDataBusPublisher implements Subscriber {
                 e.printStackTrace();
             }
         });
+    }
 
-        thread.start();
+    private PersistentQueue getPersistentQueue() {
+        return this.persistentQueue;
     }
 
 }

@@ -12,6 +12,8 @@ public class DataProducerAbsFactory {
                 return new HongdianH8922SGPSDataProducerFactory();
             case HELLA_APC_ECO_RS485:
                 return new HellaAPCECORS485DataProducerFactory();
+            case HELLA_PUSH_NOTIFICATION:
+                return new HellaPushNotificationDataProducerFactory();
             case DELL_3003_RXTX:
                 return new Dell3003RxtxGPSDataProducerFactory();
             case DELL_3003_MARINE_API:
