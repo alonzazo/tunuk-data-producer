@@ -1,0 +1,31 @@
+name: tunuk-data-producer
+title: Tunuk DataProducer
+version: '0.2.4'
+summary: IoT data producer for public transportation units monitoring
+description: |
+  Tunuk DataProducer is a software application to extract, filter, process
+  and send data to a message receiver. Tunuk leads an adaptative model
+  where different controllers can be selected to extract data from CANBus
+  sensors, APC devices, GPS and more, depending on your gateway capabilities.
+
+base: core18
+confinement: devmode
+apps:
+  tunuk-data-producer:
+    command:
+      tunuk-data-producer-$SNAPCRAFT_PROJECT_VERSION/tunuk-data-producer.sh
+    environment:
+      JAVA_HOME: $SNAP/usr/lib/jvm/java-8-openjdk-amd64
+      PATH: $JAVA_HOME/jre/bin:$PATH
+    plugs:
+      - home
+      - network
+      - cups-control
+
+parts:
+  tunuk-data-producer:
+    plugin: maven
+    source: https://github.com/alonzazo/tunuk-data-producer.git
+    source-tag: release-$SNAPCRAFT_PROJECT_VERSION
+
+
