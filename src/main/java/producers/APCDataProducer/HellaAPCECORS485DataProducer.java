@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketTimeoutException;
 import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
@@ -72,6 +73,8 @@ public class HellaAPCECORS485DataProducer implements DataProducer, Runnable {
 
         DatagramPacket receivingData = new DatagramPacket(new byte[100], 100);
 
+        socket.setSoTimeout(1000);
+
         socket.receive(receivingData);
 
         socket.close();
@@ -87,6 +90,7 @@ public class HellaAPCECORS485DataProducer implements DataProducer, Runnable {
     public void startProduction() throws Exception {
 
         Thread thread = new Thread(this);
+        thread.setName("apc-eco-door-" + doorProperties.id);
         thread.start();
 
     }
@@ -152,7 +156,10 @@ public class HellaAPCECORS485DataProducer implements DataProducer, Runnable {
                     //  Notificamos que es desconocido
                     System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: Estado de la puerta : " + doorProperties.id + " es desconocido: " + doorState);
                 }
-            } catch (Exception e){
+            } catch (SocketTimeoutException e){
+                System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [EXCEPCION]: Fallo en comunicación con Hella: Tiempo de respuesta excedido.");
+            }
+            catch (Exception e){
                 e.printStackTrace();
                 System.out.println(Instant.now() + e.getMessage());
             }

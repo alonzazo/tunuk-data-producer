@@ -42,12 +42,13 @@ public class DataProducerApplication {
             // -------------------------------------------------------------------------------------------- INITIALIZING
 
             // Cargar datos de identidad del bus
-            if (argList.contains("--debug")){
+            if (argList.contains("--debug")) {
                 try {
                     identity = loadIdentityFile(DataProducerApplication.class.getResource("").getPath() + IDENTITY_FILE_PATH);
-                } catch (Exception ex){
+                } catch (Exception ex) {
                     identity = createNewIdentityFile(DataProducerApplication.class.getResource("").getPath() + IDENTITY_FILE_PATH);
                 }
+
             } else {
                 try {
                     identity = loadIdentityFile(IDENTITY_FILE_PATH);
@@ -135,6 +136,7 @@ public class DataProducerApplication {
 
             e.printStackTrace();
             System.out.println(Instant.now() + e.getMessage());
+
         }
     }
 
