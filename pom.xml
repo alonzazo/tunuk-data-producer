@@ -25,6 +25,11 @@
     </properties>
 
     <repositories>
+        <repository>
+            <id>project.local</id>
+            <name>project</name>
+            <url>file:libs</url>
+        </repository>
 
     </repositories>
 
@@ -50,17 +55,6 @@
             <artifactId>kafka-clients</artifactId>
             <version>2.4.0</version>
         </dependency>
-
-        <!--<dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>2.12.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>2.12.1</version>
-        </dependency>-->
 
         <dependency>
             <groupId>net.sf.marineapi</groupId>
@@ -95,20 +89,11 @@
             <artifactId>jaxws-rt</artifactId>
             <version>2.2.6</version>
         </dependency>
-
-
-        <!--<dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.5</version>
-        </dependency>
-
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>1.7.5</version>
-        </dependency>-->
-
+            <groupId>com.hella</groupId>
+            <artifactId>bike.api</artifactId>
+            <version>1.0</version>
+        </dependency>
 
     </dependencies>
 
