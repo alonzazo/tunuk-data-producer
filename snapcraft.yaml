@@ -9,11 +9,12 @@ description: |
   sensors, APC devices, GPS and more, depending on your gateway capabilities.
 
 base: core18
+grade: stable
 confinement: devmode
 apps:
   tunuk-data-producer:
     command:
-      tunuk-data-producer-$SNAPCRAFT_PROJECT_VERSION/tunuk-data-producer.sh
+      tunuk-run.sh
     environment:
       JAVA_HOME: $SNAP/usr/lib/jvm/java-8-openjdk-amd64
       PATH: $JAVA_HOME/jre/bin:$PATH
@@ -25,7 +26,7 @@ apps:
 parts:
   tunuk-data-producer:
     plugin: maven
-    source: https://github.com/alonzazo/tunuk-data-producer.git
+    source: .
     source-tag: release-$SNAPCRAFT_PROJECT_VERSION
 
 
