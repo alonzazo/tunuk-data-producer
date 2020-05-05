@@ -1,4 +1,3 @@
-import javafx.util.Pair;
 import producers.DataProducer;
 import producers.GPSDataProducer.Dell3003RxtxGPSDataProducer;
 import producers.GPSDataProducer.HongdianH8922SGPSDataProducer;
@@ -6,6 +5,17 @@ import eventbuses.StreamingEventBus;
 
 import java.io.FileReader;
 import java.util.*;
+
+class Pair<T,U> extends AbstractMap.SimpleEntry<T,U> {
+
+    public Pair(T key, U value) {
+        super(key, value);
+    }
+
+    public Pair(Map.Entry<? extends T, ? extends U> entry) {
+        super(entry);
+    }
+}
 
 public class UnitTests {
 
