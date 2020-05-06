@@ -14,7 +14,7 @@ confinement: devmode
 apps:
   tunuk-data-producer:
     command:
-      tunuk-run.sh
+      java -jar $SNAP/jar/tunuk-data-producer-1.0-SNAPSHOT.jar
     environment:
       JAVA_HOME: $SNAP/usr/lib/jvm/java-8-openjdk-amd64
       PATH: $JAVA_HOME/jre/bin:$PATH
