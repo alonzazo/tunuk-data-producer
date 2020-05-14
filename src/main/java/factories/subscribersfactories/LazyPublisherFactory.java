@@ -2,13 +2,14 @@ package factories.subscribersfactories;
 
 import connectors.IoTConnector;
 import faulttolerance.PersistentQueue;
-import subscribers.IoTDataBusPublisher;
+import subscribers.LazyPublisher;
+import subscribers.Subscriber;
 
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-public class IoTDataBusPublisherFactory implements SubscriberFactory {
+public class LazyPublisherFactory implements SubscriberFactory {
 
     private IoTConnector ioTConnector;
     private String topic;
@@ -19,7 +20,7 @@ public class IoTDataBusPublisherFactory implements SubscriberFactory {
         return ioTConnector;
     }
 
-    public IoTDataBusPublisherFactory setIoTConnector(IoTConnector ioTConnector) {
+    public LazyPublisherFactory setIoTConnector(IoTConnector ioTConnector) {
         this.ioTConnector = ioTConnector; return this;
     }
 
@@ -27,7 +28,7 @@ public class IoTDataBusPublisherFactory implements SubscriberFactory {
         return topic;
     }
 
-    public IoTDataBusPublisherFactory setTopic(String topic) {
+    public LazyPublisherFactory setTopic(String topic) {
         this.topic = topic; return this;
     }
 
@@ -35,7 +36,7 @@ public class IoTDataBusPublisherFactory implements SubscriberFactory {
         return handlerFunction;
     }
 
-    public IoTDataBusPublisherFactory setHandlerFunction(Function<List<Map<String, String>>, String> handlerFunction) {
+    public LazyPublisherFactory setHandlerFunction(Function<List<Map<String, String>>, String> handlerFunction) {
         this.handlerFunction = handlerFunction; return this;
     }
 
@@ -43,12 +44,17 @@ public class IoTDataBusPublisherFactory implements SubscriberFactory {
         return persistentQueue;
     }
 
-    public IoTDataBusPublisherFactory setPersistentQueue(PersistentQueue persistentQueue) {
+    public LazyPublisherFactory setPersistentQueue(PersistentQueue persistentQueue) {
         this.persistentQueue = persistentQueue; return this;
     }
 
     @Override
-    public IoTDataBusPublisher create() {
-        return new IoTDataBusPublisher(ioTConnector,topic,handlerFunction,persistentQueue);
+    public LazyPublisher create() {
+        return new LazyPublisher(ioTConnector,topic,handlerFunction,persistentQueue);
+    }
+
+    @Override
+    public Subscriber create(IoTConnector ioTConnector, String topic, Function<List<Map<String, String>>, String> composerFunction, PersistentQueue persistentQueue) {
+        return new LazyPublisher(ioTConnector,topic,composerFunction,persistentQueue);
     }
 }

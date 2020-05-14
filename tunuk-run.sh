@@ -1,1 +1,0 @@
-java -jar build/target/tunuk-data-producer-1.0-SNAPSHOT.jar

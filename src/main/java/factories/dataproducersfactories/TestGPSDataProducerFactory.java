@@ -7,8 +7,14 @@ import producers.GPSDataProducer.TestGPSDataProducer;
 import java.util.Properties;
 
 public class TestGPSDataProducerFactory implements DataProducerFactory{
+
     @Override
-    public DataProducer create(Properties properties, EventBus EventBus) throws DataProducerPropertyNotDefinedException {
+    public DataProducer create(String configurationId, Properties configurations, EventBus eventBus) throws DataProducerPropertyNotDefinedException {
+        return create(eventBus);
+    }
+
+    @Override
+    public DataProducer create(Properties configurations, EventBus EventBus) throws DataProducerPropertyNotDefinedException {
         return create(EventBus);
     }
 

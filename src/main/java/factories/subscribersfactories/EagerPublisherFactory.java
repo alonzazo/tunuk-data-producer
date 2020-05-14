@@ -2,13 +2,14 @@ package factories.subscribersfactories;
 
 import connectors.IoTConnector;
 import faulttolerance.PersistentQueue;
-import subscribers.EagerIoTDataBusPublisher;
+import subscribers.EagerPublisher;
+import subscribers.Subscriber;
 
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-public class EagerIoTDataBusPublisherFactory implements SubscriberFactory {
+public class EagerPublisherFactory implements SubscriberFactory {
 
     private IoTConnector ioTConnector;
     private String topic;
@@ -19,7 +20,7 @@ public class EagerIoTDataBusPublisherFactory implements SubscriberFactory {
         return ioTConnector;
     }
 
-    public EagerIoTDataBusPublisherFactory setIoTConnector(IoTConnector ioTConnector) {
+    public EagerPublisherFactory setIoTConnector(IoTConnector ioTConnector) {
         this.ioTConnector = ioTConnector; return this;
     }
 
@@ -27,7 +28,7 @@ public class EagerIoTDataBusPublisherFactory implements SubscriberFactory {
         return topic;
     }
 
-    public EagerIoTDataBusPublisherFactory setTopic(String topic) {
+    public EagerPublisherFactory setTopic(String topic) {
         this.topic = topic; return this;
     }
 
@@ -35,7 +36,7 @@ public class EagerIoTDataBusPublisherFactory implements SubscriberFactory {
         return handlerFunction;
     }
 
-    public EagerIoTDataBusPublisherFactory setHandlerFunction(Function<List<Map<String, String>>, String> handlerFunction) {
+    public EagerPublisherFactory setHandlerFunction(Function<List<Map<String, String>>, String> handlerFunction) {
         this.handlerFunction = handlerFunction; return this;
     }
 
@@ -43,12 +44,17 @@ public class EagerIoTDataBusPublisherFactory implements SubscriberFactory {
         return persistentQueue;
     }
 
-    public EagerIoTDataBusPublisherFactory setPersistentQueue(PersistentQueue persistentQueue) {
+    public EagerPublisherFactory setPersistentQueue(PersistentQueue persistentQueue) {
         this.persistentQueue = persistentQueue; return this;
     }
 
     @Override
-    public EagerIoTDataBusPublisher create() {
-        return new EagerIoTDataBusPublisher(ioTConnector,topic,handlerFunction,persistentQueue);
+    public EagerPublisher create() {
+        return new EagerPublisher(ioTConnector,topic,handlerFunction,persistentQueue);
+    }
+
+    @Override
+    public Subscriber create(IoTConnector ioTConnector, String topic, Function<List<Map<String, String>>, String> composerFunction, PersistentQueue persistentQueue) {
+        return new EagerPublisher(ioTConnector,topic,composerFunction,persistentQueue);
     }
 }
