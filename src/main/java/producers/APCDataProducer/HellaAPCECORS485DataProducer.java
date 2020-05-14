@@ -1,7 +1,9 @@
 package producers.APCDataProducer;
 
-import producers.DataProducer;
 import eventbuses.EventBus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import producers.DataProducer;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -14,6 +16,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HellaAPCECORS485DataProducer implements DataProducer, Runnable {
+
+    static Logger log = LoggerFactory.getLogger(HellaAPCECORS485DataProducer.class);
 
     private enum DoorState {DOOR_OPENED, DOOR_CLOSED, DOOR_UNKNOWN};
 
@@ -69,7 +73,7 @@ public class HellaAPCECORS485DataProducer implements DataProducer, Runnable {
         DatagramPacket packet = new DatagramPacket(buffer, buffer.length, InetAddress.getByName(doorProperties.ipAddress), doorProperties.port);
         socket.send(packet);
 
-        System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: Mensaje enviado al Hella " + doorProperties.id +": " + request);
+        log.info(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: Mensaje enviado al Hella " + doorProperties.id +": " + request);
 
         DatagramPacket receivingData = new DatagramPacket(new byte[100], 100);
 
@@ -81,7 +85,7 @@ public class HellaAPCECORS485DataProducer implements DataProducer, Runnable {
 
         String messageReceived = new String(receivingData.getData());
 
-        System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: Mensaje recibido del Hella " + doorProperties.id + ": " + messageReceived);
+        log.info(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: Mensaje recibido del Hella " + doorProperties.id + ": " + messageReceived);
 
         return messageReceived;
     }
@@ -103,15 +107,15 @@ public class HellaAPCECORS485DataProducer implements DataProducer, Runnable {
             try {
                 //Si esta cerrada, es decir, = 1
                 DoorState doorState = getDoorState();
-                System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: El estado de la puerta es: " + doorState);
+                log.info(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: El estado de la puerta es: " + doorState);
                 if (doorState == DoorState.DOOR_CLOSED){
 
-                    System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: La puerta está cerrada");
+                    log.info(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: La puerta está cerrada");
                     //  Actualizamos el estado de la puerta a cerrado
                     doorProperties.isOpened = false;
                     //  Consultamos la cantidad de entradas y salidas 'VDV2bE'
                     Map<String, String> extendedData = getExtendedData();
-                    System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: Los datos se han extraido " + extendedData.toString());
+                    log.info(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: Los datos se han extraido " + extendedData.toString());
 
                     int inPassengers = Integer.parseInt(extendedData.get("inPassengers"));
                     int outPassengers = Integer.parseInt(extendedData.get("outPassengers"));
@@ -122,7 +126,7 @@ public class HellaAPCECORS485DataProducer implements DataProducer, Runnable {
                     if ((inPassengers > 0 || outPassengers > 0) && duration != 0){
                         //      Se resetea el contador 'VDV2bF' + id
                         resetCounter();
-                        System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: El contador se ha reseteado");
+                        log.info(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: El contador se ha reseteado");
                         //      Si se resetea bien
                         //          la fecha se setea en 0
                         doorProperties.date = new Date(0);
@@ -136,17 +140,17 @@ public class HellaAPCECORS485DataProducer implements DataProducer, Runnable {
                         //Se coloca la identidad
                         putIdentityToData(extendedData);
 
-                        System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " "+ extendedData);
+                        log.info(Instant.now() + " " + Thread.currentThread().getName() + " "+ extendedData);
 
                         getEventBus().publishData(this.getClass(), extendedData);
                     } else {
-                        System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: No se encontraron datos en puerta: " + doorProperties.id + " -> Mensaje no enviado");
+                        log.info(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: No se encontraron datos en puerta: " + doorProperties.id + " -> Mensaje no enviado");
                     }
                     //      Notificamos el error
                     //Si la puerta está abierta, es decir, = 0
                 } else if (doorState == DoorState.DOOR_OPENED){
                     //  Notificamos que está abierta
-                    System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: Puerta " + doorProperties.id + " está abierta");
+                    log.info(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: Puerta " + doorProperties.id + " está abierta");
                     //  Actualizamos el estado de la puerta a abierto
                     if (!doorProperties.isOpened) doorProperties.date = new Date(System.currentTimeMillis());
                     doorProperties.isOpened = true;
@@ -154,14 +158,14 @@ public class HellaAPCECORS485DataProducer implements DataProducer, Runnable {
                     //Si el estado de la puerta es desconocido
                 } else {
                     //  Notificamos que es desconocido
-                    System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: Estado de la puerta : " + doorProperties.id + " es desconocido: " + doorState);
+                    log.info(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: Estado de la puerta : " + doorProperties.id + " es desconocido: " + doorState);
                 }
             } catch (SocketTimeoutException e){
-                System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [EXCEPCION]: Fallo en comunicación con Hella: Tiempo de respuesta excedido.");
+                log.info(Instant.now() + " " + Thread.currentThread().getName() + " [EXCEPCION]: Fallo en comunicación con Hella: Tiempo de respuesta excedido.");
             }
             catch (Exception e){
                 e.printStackTrace();
-                System.out.println(Instant.now() + e.getMessage());
+                log.info(Instant.now() + e.getMessage());
             }
 
             try {

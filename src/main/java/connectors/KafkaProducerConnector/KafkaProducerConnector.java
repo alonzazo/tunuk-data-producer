@@ -3,6 +3,8 @@ package connectors.KafkaProducerConnector;
 import connectors.IoTConnector;
 import connectors.IoTConnectorException;
 import org.apache.kafka.clients.producer.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
 import java.time.Instant;
@@ -10,6 +12,8 @@ import java.util.Properties;
 
 
 public class KafkaProducerConnector implements IoTConnector {
+
+    static Logger log = LoggerFactory.getLogger(KafkaProducerConnector.class);
 
     private Producer<String, String> kafkaProducer;
     private String bootstrapServersConfig;
@@ -87,8 +91,8 @@ public class KafkaProducerConnector implements IoTConnector {
             /*kafkaProducer.close();*/
 
 
-            /*System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [KAFKA_RESULT]: Message was received successfully: " + message);*/
-            System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [KAFKA_RESULT]: Message was received successfully: " + message);
+            /*log.info(Instant.now() + " " + Thread.currentThread().getName() + " [KAFKA_RESULT]: Message was received successfully: " + message);*/
+            log.info(Instant.now() + " " + Thread.currentThread().getName() + " [KAFKA_RESULT]: Message was received successfully: " + message);
 
         } catch (Exception e) {
 /*            if (kafkaProducer != null)

@@ -1,5 +1,7 @@
 package eventbuses;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import subscribers.Subscriber;
 
 import java.util.LinkedList;
@@ -8,6 +10,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MicrobatchDataBus implements DataBus {
+
+    static Logger log = LoggerFactory.getLogger(MicrobatchDataBus.class);
 
     private Map<Class<?>, List<Map<String, String>>> dataBus;
     private List<Subscriber> subscribers;
@@ -65,7 +69,7 @@ public class MicrobatchDataBus implements DataBus {
                     }
                     Thread.sleep(getInterval());
                 } catch (InterruptedException e) {
-                    System.out.println(e.getMessage());
+                    log.info(e.getMessage());
                 }
             }
 

@@ -11,6 +11,8 @@ import net.sf.marineapi.nmea.sentence.GLLSentence;
 import net.sf.marineapi.nmea.sentence.RMCSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.util.Position;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import producers.DataProducer;
 import eventbuses.EventBus;
 
@@ -20,6 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Dell3003RxtxGPSDataProducer implements DataProducer, SerialPortEventListener {
+
+    static Logger log = LoggerFactory.getLogger(Dell3003RxtxGPSDataProducer.class);
 
     ///--------------------------------------------------------------------PROPIEDADES o ATRIBUTOS
     private SerialPort serialPort;
@@ -106,8 +110,8 @@ public class Dell3003RxtxGPSDataProducer implements DataProducer, SerialPortEven
     public void startProduction() throws Exception {
 
         serialPort = new SerialPort(serialPortName);
-        System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " Port opened: " + serialPort.openPort());
-        System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " Params setted: " + serialPort.setParams(9600, 8, 1, 0));//Set params.
+        log.info(Instant.now() + " " + Thread.currentThread().getName() + " Port opened: " + serialPort.openPort());
+        log.info(Instant.now() + " " + Thread.currentThread().getName() + " Params setted: " + serialPort.setParams(9600, 8, 1, 0));//Set params.
         serialPort.addEventListener(this);//Add SerialPortEventListener
 
     }
@@ -139,7 +143,7 @@ public class Dell3003RxtxGPSDataProducer implements DataProducer, SerialPortEven
                     Map<String, String> lineParsed = parseNMEASentence(lines[i]);
                     if (lineParsed.size() != 0){
                         gpsData.putAll(lineParsed);
-                        /*System.out.println(Instant.now().toString() + " [INTERPRETACION CORRECTA]: \n↳CRUDA:        " + lines[i] + "\n↳INTERPRETADA: " + lineParsed.toString());*/
+                        /*log.info(Instant.now().toString() + " [INTERPRETACION CORRECTA]: \n↳CRUDA:        " + lines[i] + "\n↳INTERPRETADA: " + lineParsed.toString());*/
                     }
                 }
 
@@ -149,13 +153,13 @@ public class Dell3003RxtxGPSDataProducer implements DataProducer, SerialPortEven
                     // Publicamos los datos en el bus de datos
                     EventBus.publishData(this.getClass(), gpsData);
                 } else {
-                    /*System.out.println(Instant.now().toString() + " [EXCEPCION]: No se agregó datos GPS al EventBus");*/
+                    /*log.info(Instant.now().toString() + " [EXCEPCION]: No se agregó datos GPS al EventBus");*/
                 }
             }
         }
 
         catch (SerialPortException ex) {
-            /*System.out.println(Instant.now() + ex.getMessage());*/
+            /*log.info(Instant.now() + ex.getMessage());*/
         }
     }
 
@@ -176,7 +180,7 @@ public class Dell3003RxtxGPSDataProducer implements DataProducer, SerialPortEven
             Sentence sentence = sentenceFactory.createParser(line);
 
             if (sentence instanceof GGASentence){
-                /*System.out.println(Instant.now().toString() + " [ GGA ENCONTRADA ]:          "+ line);*/
+                /*log.info(Instant.now().toString() + " [ GGA ENCONTRADA ]:          "+ line);*/
                 GGASentence ggaSentence = (GGASentence) sentence;
 
                 Position position = ggaSentence.getPosition();
@@ -185,7 +189,7 @@ public class Dell3003RxtxGPSDataProducer implements DataProducer, SerialPortEven
                 result.put("longitude", String.valueOf(position.getLongitude()));
                 result.put("altitude", String.valueOf(position.getAltitude()));
             } else if (sentence instanceof RMCSentence){
-                /*System.out.println(Instant.now().toString() + " [ RMC ENCONTRADA ]:          " + line);*/
+                /*log.info(Instant.now().toString() + " [ RMC ENCONTRADA ]:          " + line);*/
                 RMCSentence rmcSentence = (RMCSentence) sentence;
                 Position position = rmcSentence.getPosition();
 
@@ -194,7 +198,7 @@ public class Dell3003RxtxGPSDataProducer implements DataProducer, SerialPortEven
                 result.put("altitude", String.valueOf(position.getAltitude()));
             }
             else if (sentence instanceof GLLSentence){
-                /*System.out.println(Instant.now().toString() + " [ GLL ENCONTRADA ]:          " + line);*/
+                /*log.info(Instant.now().toString() + " [ GLL ENCONTRADA ]:          " + line);*/
                 GLLSentence gllSentence = (GLLSentence) sentence;
                 Position position = gllSentence.getPosition();
 
@@ -202,16 +206,16 @@ public class Dell3003RxtxGPSDataProducer implements DataProducer, SerialPortEven
                 result.put("longitude", String.valueOf(position.getLongitude()));
                 result.put("altitude", String.valueOf(position.getAltitude()));
             } else {
-                /*System.out.println(Instant.now().toString() + " [ FORMATO NO IDENTIFICADO ]: " + line );*/
+                /*log.info(Instant.now().toString() + " [ FORMATO NO IDENTIFICADO ]: " + line );*/
             }
 
         }
         catch (DataNotAvailableException e){
-            /*System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [ EXCEPCION ]:               Datos no disponibles");*/
+            /*log.info(Instant.now() + " " + Thread.currentThread().getName() + " [ EXCEPCION ]:               Datos no disponibles");*/
         }
         catch (Exception ignored){
             //ignored.printStackTrace();
-            /*System.out.println(Instant.now() + ignored.getMessage());*/
+            /*log.info(Instant.now() + ignored.getMessage());*/
         }
         return result;
     }

@@ -6,6 +6,8 @@ import net.sf.marineapi.nmea.event.SentenceEvent;
 import net.sf.marineapi.nmea.event.SentenceListener;
 import net.sf.marineapi.nmea.io.SentenceReader;
 import net.sf.marineapi.nmea.sentence.SentenceValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import producers.DataProducer;
 import eventbuses.EventBus;
 
@@ -15,6 +17,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class Dell3003MarineApiGPSDataProducer implements DataProducer, SentenceListener {
+
+    static Logger log = LoggerFactory.getLogger(Dell3003MarineApiGPSDataProducer.class);
+
     @Override
     public EventBus getEventBus() {
         return null;
@@ -27,24 +32,24 @@ public class Dell3003MarineApiGPSDataProducer implements DataProducer, SentenceL
 
     @Override
     public void readingPaused() {
-        System.out.println("-- Paused --");
+        log.info("-- Paused --");
     }
 
     @Override
     public void readingStarted() {
-        System.out.println("-- Started --");
+        log.info("-- Started --");
     }
 
     @Override
     public void readingStopped() {
-        System.out.println("-- Stopped --");
+        log.info("-- Stopped --");
 
     }
 
     @Override
     public void sentenceRead(SentenceEvent sentenceEvent) {
         // here we receive each sentence read from the port
-        System.out.println(sentenceEvent.getSentence());
+        log.info(String.valueOf(sentenceEvent.getSentence()));
     }
 
     @Override
@@ -78,14 +83,14 @@ public class Dell3003MarineApiGPSDataProducer implements DataProducer, SentenceL
                     InputStreamReader isr = new InputStreamReader(is);
                     BufferedReader buf = new BufferedReader(isr);
 
-                    System.out.println("Scanning port " + sp.getName());
+                    log.info("Scanning port " + sp.getName());
 
                     // try each port few times before giving up
                     for (int i = 0; i < 5; i++) {
                         try {
                             String data = buf.readLine();
                             if (SentenceValidator.isValid(data)) {
-                                System.out.println("NMEA data found!");
+                                log.info("NMEA data found!");
                                 return sp;
                             }
                         } catch (Exception ex) {
@@ -97,7 +102,7 @@ public class Dell3003MarineApiGPSDataProducer implements DataProducer, SentenceL
                     buf.close();
                 }
             //}
-            System.out.println("NMEA data was not found..");
+            log.info("NMEA data was not found..");
 
         } catch (Exception e) {
             e.printStackTrace();
