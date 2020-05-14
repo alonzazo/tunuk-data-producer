@@ -10,7 +10,7 @@ description: |
 
 base: core18
 grade: stable
-confinement: devmode
+confinement: strict
 apps:
   tunuk-data-producer:
     command:

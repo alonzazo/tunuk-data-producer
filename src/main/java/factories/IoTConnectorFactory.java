@@ -6,6 +6,8 @@ import connectors.KafkaProducerConnector.AsyncKafkaProducerConnector;
 import connectors.KafkaProducerConnector.KafkaProducerConnector;
 import connectors.StandardOutputConnector.StandardOutputConnector;
 
+import java.util.Properties;
+
 public class IoTConnectorFactory {
 
     private static IoTConnector createAWSIoTConnector(){return new AWSIoTConnector();};
@@ -56,4 +58,24 @@ public class IoTConnectorFactory {
         }
     }
 
+    public static IoTConnector create(String configurationId, IoTConnectorType type, Properties configurations) throws Exception {
+        switch (type){
+            case AMAZON_WEB_SERVICES:
+                return createAWSIoTConnector();
+            case STANDARD_OUTPUT:
+                return createStandardOutputConnector();
+            case KAFKA_PRODUCER:
+                if (!configurations.containsKey(String.format("%s.subscriber.connector.KAFKA_PRODUCER.ipaddress", configurationId)))
+                    return createKafkaProducerConnector();
+                else
+                    return createKafkaProducerConnector(configurations.getProperty(String.format("%s.subscriber.connector.KAFKA_PRODUCER.ipaddress", configurationId)));
+            case ASYNC_KAFKA_PRODUCER:
+                if (!configurations.containsKey(String.format("%s.subscriber.connector.ASYNC_KAFKA_PRODUCER.ipaddress", configurationId)))
+                    return createAsyncKafkaProducerConnector();
+                else
+                    return createAsyncKafkaProducerConnector(configurations.getProperty(String.format("%s.subscriber.connector.ASYNC_KAFKA_PRODUCER.ipaddress", configurationId)));
+            default:
+                throw new Exception("IoTConnector is not well specified.");
+        }
+    }
 }

@@ -13,7 +13,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
-public class IoTDataBusPublisher implements Subscriber {
+public class LazyPublisher implements Subscriber {
 
     private IoTConnector ioTConnector;
     private Function<List<Map<String, String>>, String> handlerFunction;
@@ -22,21 +22,21 @@ public class IoTDataBusPublisher implements Subscriber {
     private AtomicBoolean connected;
     private ExecutorService executor = Executors.newFixedThreadPool(100);
 
-    public IoTDataBusPublisher(IoTConnector ioTConnector, String topic, Function<List<Map<String, String>>, String> handlerFunction) {
+    public LazyPublisher(IoTConnector ioTConnector, String topic, Function<List<Map<String, String>>, String> handlerFunction) {
         this.ioTConnector = ioTConnector;
         this.handlerFunction = handlerFunction;
         this.topic = topic;
         this.connected = new AtomicBoolean(false);
     }
 
-    public IoTDataBusPublisher(IoTConnector ioTConnector, String topic, Function<List<Map<String, String>>, String> handlerFunction, int sleepTime) {
+    public LazyPublisher(IoTConnector ioTConnector, String topic, Function<List<Map<String, String>>, String> handlerFunction, int sleepTime) {
         this.ioTConnector = ioTConnector;
         this.handlerFunction = handlerFunction;
         this.topic = topic;
         this.connected = new AtomicBoolean(false);
     }
 
-    public IoTDataBusPublisher(IoTConnector ioTConnector, String topic, Function<List<Map<String, String>>, String> handlerFunction, PersistentQueue persistentQueue) {
+    public LazyPublisher(IoTConnector ioTConnector, String topic, Function<List<Map<String, String>>, String> handlerFunction, PersistentQueue persistentQueue) {
         this.ioTConnector = ioTConnector;
         this.handlerFunction = handlerFunction;
         this.topic = topic;
@@ -83,6 +83,16 @@ public class IoTDataBusPublisher implements Subscriber {
         }
 
 
+    }
+
+    @Override
+    public void initialize() throws IoTConnectorException {
+        ioTConnector.connect();
+    }
+
+    @Override
+    public void finish() throws IoTConnectorException {
+        ioTConnector.close();
     }
 
     private void sendMessageAsAThread(String message) {

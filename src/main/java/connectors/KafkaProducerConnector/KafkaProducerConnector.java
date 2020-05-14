@@ -12,14 +12,12 @@ import java.util.Properties;
 public class KafkaProducerConnector implements IoTConnector {
 
     private Producer<String, String> kafkaProducer;
-    /*private String bootstrapServersConfig = "18.217.74.235:9092";*/
-    /*private String bootstrapServersConfig = "52.87.66.174:9092";*/
     private String bootstrapServersConfig;
     private String keySerializerClassConfig = "org.apache.kafka.common.serialization.ByteArraySerializer";
     private String valueSerializerClassConfig = "org.apache.kafka.common.serialization.StringSerializer";
 
     public KafkaProducerConnector(){
-        bootstrapServersConfig = "3.221.246.97:9092";
+        bootstrapServersConfig = "localhost:9092";
     }
 
     public KafkaProducerConnector(String bootstrapServers){

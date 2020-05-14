@@ -1,20 +1,22 @@
 package absfactories;
 
-import factories.subscribersfactories.EagerIoTDataBusPublisherFactory;
-import factories.subscribersfactories.IoTDataBusPublisherFactory;
+import factories.subscribersfactories.EagerPublisherFactory;
+import factories.subscribersfactories.LazyPublisherFactory;
 import factories.subscribersfactories.SubscriberFactory;
 
 public class SubscriberAbsFactory {
 
     private SubscriberAbsFactory(){}
 
+
+
     public static SubscriberFactory createFactory(SubscriberType type) throws SubscriberNotFoundException
     {
         switch (type){
-            case IOT_DATA_BUS_PUBLISHER:
-                return new IoTDataBusPublisherFactory();
-            case EAGER_IOT_DATA_BUS_PUBLISHER:
-                return new EagerIoTDataBusPublisherFactory();
+            case LAZY_PUBLISHER:
+                return new LazyPublisherFactory();
+            case EAGER_PUBLISHER:
+                return new EagerPublisherFactory();
             default:
                 throw new SubscriberNotFoundException();
         }

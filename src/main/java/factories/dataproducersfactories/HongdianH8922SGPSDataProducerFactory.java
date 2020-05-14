@@ -9,13 +9,28 @@ import java.util.Properties;
 public class HongdianH8922SGPSDataProducerFactory implements DataProducerFactory{
 
     @Override
-    public DataProducer create(Properties properties, EventBus EventBus) throws DataProducerPropertyNotDefinedException {
+    public DataProducer create(String configurationId, Properties configurations, EventBus eventBus) throws DataProducerPropertyNotDefinedException {
         // Se definen los valores default
         int port;
 
         // Se valida si existen, si no se queda con valor default
-        if (properties.containsKey("producer.port")){
-            port = Integer.parseInt(properties.getProperty("producer.port"));
+        if (configurations.containsKey(String.format("%s.producer.port", configurationId))){
+            port = Integer.parseInt(configurations.getProperty(String.format("%s.producer.port", configurationId)));
+        } else {
+            throw new DataProducerPropertyNotDefinedException("producer.port");
+        }
+
+        return new HongdianH8922SGPSDataProducer(port,eventBus);
+    }
+
+    @Override
+    public DataProducer create(Properties configurations, EventBus EventBus) throws DataProducerPropertyNotDefinedException {
+        // Se definen los valores default
+        int port;
+
+        // Se valida si existen, si no se queda con valor default
+        if (configurations.containsKey("producer.port")){
+            port = Integer.parseInt(configurations.getProperty("producer.port"));
         } else {
             throw new DataProducerPropertyNotDefinedException("producer.port");
         }

@@ -7,13 +7,26 @@ import eventbuses.EventBus;
 import java.util.Properties;
 
 public class Dell3003RxtxGPSDataProducerFactory implements DataProducerFactory {
+
     @Override
-    public DataProducer create(Properties properties, EventBus EventBus) throws DataProducerPropertyNotDefinedException {
+    public DataProducer create(String configurationId, Properties configurations, EventBus eventBus) throws DataProducerPropertyNotDefinedException {
+        String serialPort;
+
+        if (configurations.containsKey(String.format("%s.producer.serialport", configurationId)))
+            serialPort = configurations.getProperty(String.format("%s.producer.serialport", configurationId));
+        else
+            throw new DataProducerPropertyNotDefinedException(String.format("%s.producer.serialport", configurationId));
+
+        return new Dell3003RxtxGPSDataProducer(serialPort, eventBus);
+    }
+
+    @Override
+    public DataProducer create(Properties configurations, EventBus EventBus) throws DataProducerPropertyNotDefinedException {
 
         String serialPort;
 
-        if (properties.containsKey("producer.serialport"))
-            serialPort = properties.getProperty("producer.serialport");
+        if (configurations.containsKey("producer.serialport"))
+            serialPort = configurations.getProperty("producer.serialport");
         else
             throw new DataProducerPropertyNotDefinedException("producer.serialport");
 
