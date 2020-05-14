@@ -15,20 +15,13 @@
 
 package utils;
 
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.*;
 import java.math.BigInteger;
 import java.net.URL;
-import java.security.GeneralSecurityException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.SecureRandom;
+import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -40,6 +33,9 @@ import java.util.Properties;
  * certificate from the resource files.
  */
 public class SampleUtil {
+
+    static Logger log = LoggerFactory.getLogger(SampleUtil.class);
+
     private static final String PropertyFile = "aws-iot-sdk-samples.properties";
 
     public static class KeyStorePasswordPair {
@@ -78,10 +74,10 @@ public class SampleUtil {
     public static KeyStorePasswordPair getKeyStorePasswordPair(final String certificateFile, final String privateKeyFile,
             String keyAlgorithm) {
         if (certificateFile == null || privateKeyFile == null) {
-            System.out.println("Certificate or private key file missing");
+            log.info("Certificate or private key file missing");
             return null;
         }
-        System.out.println("Cert file:" +certificateFile + " Private key: "+ privateKeyFile);
+        log.info("Cert file:" +certificateFile + " Private key: "+ privateKeyFile);
 
         final PrivateKey privateKey = loadPrivateKeyFromFile(privateKeyFile, keyAlgorithm);
 
@@ -106,7 +102,7 @@ public class SampleUtil {
             certChain = certificates.toArray(certChain);
             keyStore.setKeyEntry("alias", privateKey, keyPassword.toCharArray(), certChain);
         } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
-            System.out.println("Failed to create key store");
+            log.info("Failed to create key store");
             return null;
         }
 
@@ -116,7 +112,7 @@ public class SampleUtil {
     private static List<Certificate> loadCertificatesFromFile(final String filename) {
         File file = new File(filename);
         if (!file.exists()) {
-            System.out.println("Certificate file: " + filename + " is not found.");
+            log.info("Certificate file: " + filename + " is not found.");
             return null;
         }
 
@@ -124,7 +120,7 @@ public class SampleUtil {
             final CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
             return (List<Certificate>) certFactory.generateCertificates(stream);
         } catch (IOException | CertificateException e) {
-            System.out.println("Failed to load certificate file " + filename);
+            log.info("Failed to load certificate file " + filename);
         }
         return null;
     }
@@ -134,13 +130,13 @@ public class SampleUtil {
 
         File file = new File(filename);
         if (!file.exists()) {
-            System.out.println("Private key file not found: " + filename);
+            log.info("Private key file not found: " + filename);
             return null;
         }
         try (DataInputStream stream = new DataInputStream(new FileInputStream(file))) {
             privateKey = PrivateKeyReader.getPrivateKey(stream, algorithm);
         } catch (IOException | GeneralSecurityException e) {
-            System.out.println("Failed to load private key from file " + filename);
+            log.info("Failed to load private key from file " + filename);
         }
 
         return privateKey;

@@ -12,6 +12,8 @@ import net.sf.marineapi.nmea.sentence.GLLSentence;
 import net.sf.marineapi.nmea.sentence.RMCSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.util.Position;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import producers.DataProducer;
 
 import java.time.Instant;
@@ -19,6 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class AdafruitUltimateGPSDataProducer implements DataProducer, SerialPortEventListener {
+
+    static Logger log = LoggerFactory.getLogger(AdafruitUltimateGPSDataProducer.class);
 
     ///--------------------------------------------------------------------PROPIEDADES o ATRIBUTOS
     private SerialPort serialPort;
@@ -105,8 +109,8 @@ public class AdafruitUltimateGPSDataProducer implements DataProducer, SerialPort
     public void startProduction() throws Exception {
 
         serialPort = new SerialPort(serialPortName);
-        System.out.println(Instant.now() + " " + Thread.currentThread().getName() + "Port opened: " + serialPort.openPort());
-        System.out.println(Instant.now() + " " + Thread.currentThread().getName() + "Params setted: " + serialPort.setParams(9600, 8, 1, 0));//Set params.
+        log.info(Instant.now() + " " + Thread.currentThread().getName() + "Port opened: " + serialPort.openPort());
+        log.info(Instant.now() + " " + Thread.currentThread().getName() + "Params setted: " + serialPort.setParams(9600, 8, 1, 0));//Set params.
         serialPort.addEventListener(this);//Add SerialPortEventListener
 
     }
@@ -138,7 +142,7 @@ public class AdafruitUltimateGPSDataProducer implements DataProducer, SerialPort
                                 // Publicamos los datos en el bus de datos
                                 EventBus.publishData(this.getClass(), lineParsed);
 
-                                System.out.println(Instant.now().toString() + " [INTERPRETACION CORRECTA]: \n↳CRUDA:        " + toProcess + "\n↳INTERPRETADA: " + lineParsed.toString());
+                                log.info(Instant.now().toString() + " [INTERPRETACION CORRECTA]: \n↳CRUDA:        " + toProcess + "\n↳INTERPRETADA: " + lineParsed.toString());
                             }
 
                         }
@@ -149,7 +153,7 @@ public class AdafruitUltimateGPSDataProducer implements DataProducer, SerialPort
                 }
             }
             catch (SerialPortException ex) {
-                System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " " + ex);
+                log.info(Instant.now() + " " + Thread.currentThread().getName() + " " + ex);
             }
         }
         /*try {
@@ -158,7 +162,7 @@ public class AdafruitUltimateGPSDataProducer implements DataProducer, SerialPort
             if (bytes != null){
                 String incomingString = new String(bytes,StandardCharsets.UTF_8);
 
-                System.out.println("ENTRADA DEL GPS CRUDA:\n" + incomingString);
+                log.info("ENTRADA DEL GPS CRUDA:\n" + incomingString);
 
                 if (incomingString.charAt(0) == '$')
                     residualStream += "\r\n";
@@ -175,13 +179,13 @@ public class AdafruitUltimateGPSDataProducer implements DataProducer, SerialPort
 
                 //Componemos los datos del GPS
 
-                System.out.println("***********************INTERPRETACION COMENZADA**********************");
+                log.info("***********************INTERPRETACION COMENZADA**********************");
                 for (int i = 0; i < lines.length - 1; i++){
                     //gpsData.putAll(parseNMEASentence("$GPGGA,224900.000,4832.3762,N,00903.5393,E,1,04,7.8,498.6,M,48.0,M,,0000*5E"));
                     Map<String, String> lineParsed = parseNMEASentence(lines[i]);
                     if (lineParsed.size() != 0){
                         gpsData.putAll(lineParsed);
-                        System.out.println("-----------------------------------INTERPRETACION CORRECTA\nLÍNEA CRUDA GPS: \n" + lines[i] + "\nLÍNEA INTERPRETADA GPS:\n" + lineParsed.toString() + "\n----------------------------------");
+                        log.info("-----------------------------------INTERPRETACION CORRECTA\nLÍNEA CRUDA GPS: \n" + lines[i] + "\nLÍNEA INTERPRETADA GPS:\n" + lineParsed.toString() + "\n----------------------------------");
                     }
                 }
 
@@ -191,14 +195,14 @@ public class AdafruitUltimateGPSDataProducer implements DataProducer, SerialPort
                     // Publicamos los datos en el bus de datos
                     EventBus.publishData(this.getClass(), gpsData);
                 } else {
-                    System.out.println("No se agregó datos GPS al EventBus");
+                    log.info("No se agregó datos GPS al EventBus");
                 }
-                System.out.println("******************INTERPRETACION FINALIZADA**************************");
+                log.info("******************INTERPRETACION FINALIZADA**************************");
             }
         }
 
         catch (SerialPortException ex) {
-            System.out.println(ex.getMessage());
+            log.info(ex.getMessage());
         }*/
 
     }
@@ -220,7 +224,7 @@ public class AdafruitUltimateGPSDataProducer implements DataProducer, SerialPort
             Sentence sentence = sentenceFactory.createParser(line);
 
             if (sentence instanceof GGASentence){
-                System.out.println(Instant.now().toString() + " [ GGA ENCONTRADA ]:          "+ line);
+                log.info(Instant.now().toString() + " [ GGA ENCONTRADA ]:          "+ line);
                 GGASentence ggaSentence = (GGASentence) sentence;
 
                 Position position = ggaSentence.getPosition();
@@ -229,7 +233,7 @@ public class AdafruitUltimateGPSDataProducer implements DataProducer, SerialPort
                 result.put("longitude", String.valueOf(position.getLongitude()));
                 result.put("altitude", String.valueOf(position.getAltitude()));
             } else if (sentence instanceof RMCSentence){
-                System.out.println(Instant.now().toString() + " [ RMC ENCONTRADA ]:          " + line);
+                log.info(Instant.now().toString() + " [ RMC ENCONTRADA ]:          " + line);
                 RMCSentence rmcSentence = (RMCSentence) sentence;
                 Position position = rmcSentence.getPosition();
 
@@ -238,7 +242,7 @@ public class AdafruitUltimateGPSDataProducer implements DataProducer, SerialPort
                 result.put("altitude", String.valueOf(position.getAltitude()));
             }
             else if (sentence instanceof GLLSentence){
-                System.out.println(Instant.now().toString() + " [ GLL ENCONTRADA ]:          " + line);
+                log.info(Instant.now().toString() + " [ GLL ENCONTRADA ]:          " + line);
                 GLLSentence gllSentence = (GLLSentence) sentence;
                 Position position = gllSentence.getPosition();
 
@@ -246,16 +250,16 @@ public class AdafruitUltimateGPSDataProducer implements DataProducer, SerialPort
                 result.put("longitude", String.valueOf(position.getLongitude()));
                 result.put("altitude", String.valueOf(position.getAltitude()));
             } else {
-                System.out.println(Instant.now().toString() + " [ FORMATO NO IDENTIFICADO ]: " + line );
+                log.info(Instant.now().toString() + " [ FORMATO NO IDENTIFICADO ]: " + line );
             }
 
         }
         catch (DataNotAvailableException e){
-            System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [ EXCEPCION ]:               Datos no disponibles");
+            log.info(Instant.now() + " " + Thread.currentThread().getName() + " [ EXCEPCION ]:               Datos no disponibles");
         }
         catch (Exception ignored){
             //ignored.printStackTrace();
-            System.out.println(ignored.getMessage());
+            log.info(ignored.getMessage());
         }
         return result;
     }

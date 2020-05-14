@@ -3,6 +3,8 @@ package connectors.KafkaProducerConnector;
 import connectors.IoTConnector;
 import connectors.IoTConnectorException;
 import org.apache.kafka.clients.producer.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
 import java.time.Instant;
@@ -10,6 +12,8 @@ import java.util.Properties;
 
 
 public class AsyncKafkaProducerConnector implements IoTConnector {
+
+    static Logger log = LoggerFactory.getLogger(AsyncKafkaProducerConnector.class);
 
     private Producer<String, String> kafkaProducer;
     /*private String bootstrapServersConfig = "18.217.74.235:9092";*/
@@ -75,7 +79,7 @@ public class AsyncKafkaProducerConnector implements IoTConnector {
 
             kafkaProducer.send(record, (recordMetadata, e) -> {
                 if (recordMetadata != null) {
-                    System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [KAFKA_RESULT]: Message was received successfully: " + message);
+                    log.info(Instant.now() + " " + Thread.currentThread().getName() + " [KAFKA_RESULT]: Message was received successfully: " + message);
                 } else {
                     throw new RuntimeException(e);
                 }
@@ -86,7 +90,7 @@ public class AsyncKafkaProducerConnector implements IoTConnector {
                     ProducerRecord<String, String> record = new ProducerRecord<>(topic, message);
                     RecordMetadata resultMetadata = kafkaProducer.send(record).get();
 
-                    System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " "+ Thread.currentThread().getName() + " [KAFKA_RESULT]: Message was received successfully: " + message);
+                    log.info(Instant.now() + " " + Thread.currentThread().getName() + " "+ Thread.currentThread().getName() + " [KAFKA_RESULT]: Message was received successfully: " + message);
 
 
                 } catch (Exception e) {

@@ -4,6 +4,8 @@ import connectors.IoTConnector;
 import connectors.IoTConnectorException;
 import faulttolerance.PersistentQueue;
 import faulttolerance.PersistentQueueException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.util.List;
@@ -14,6 +16,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 public class LazyPublisher implements Subscriber {
+
+    static Logger log = LoggerFactory.getLogger(LazyPublisher.class);
 
     private IoTConnector ioTConnector;
     private Function<List<Map<String, String>>, String> handlerFunction;
@@ -64,7 +68,7 @@ public class LazyPublisher implements Subscriber {
                     size = getPersistentQueue().size();
                 }
 
-                System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: Se han encontrado " + size + " mensajes en cola de respaldo -> Intentando retransmitir...");
+                log.info(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: Se han encontrado " + size + " mensajes en cola de respaldo -> Intentando retransmitir...");
 
                 while (messageOld != null) {
 
@@ -78,7 +82,7 @@ public class LazyPublisher implements Subscriber {
 
                 }
             } catch (PersistentQueueException e) {
-                System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [EXCEPCIÓN]: No se logró extraer o guardar mensaje de cola de respaldo ");
+                log.info(Instant.now() + " " + Thread.currentThread().getName() + " [EXCEPCIÓN]: No se logró extraer o guardar mensaje de cola de respaldo ");
             }
         }
 
@@ -104,13 +108,13 @@ public class LazyPublisher implements Subscriber {
 
                 connected.set(true);
 
-                System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: Mensaje enviado con éxito: " + message);
+                log.info(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: Mensaje enviado con éxito: " + message);
 
             } catch (IoTConnectorException e) {
 
                 connected.set(false);
 
-                System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: Fallo en la conexión -> Intentando guardar en cola de respaldo...");
+                log.info(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: Fallo en la conexión -> Intentando guardar en cola de respaldo...");
                 try {
                     if (message.contains("APC")) {
                         long size = -1;
@@ -120,21 +124,21 @@ public class LazyPublisher implements Subscriber {
                             size = getPersistentQueue().size();
                         }
 
-                        System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: Mensaje sensible " + size + " guardado con éxito: " + message);
+                        log.info(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: Mensaje sensible " + size + " guardado con éxito: " + message);
 
                     } else {
-                        System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: Mensaje dispensable, no se guardó: " + message);
+                        log.info(Instant.now() + " " + Thread.currentThread().getName() + " [MENSAJE]: Mensaje dispensable, no se guardó: " + message);
                     }
 
                 } catch (Exception exception) {
 
-                    System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [EXCEPCION]: " + exception.getMessage());
+                    log.info(Instant.now() + " " + Thread.currentThread().getName() + " [EXCEPCION]: " + exception.getMessage());
                     exception.printStackTrace();
 
                 }
 
             } catch (Throwable e) {
-                System.out.println(Instant.now() + " " + Thread.currentThread().getName() + " [EXCEPCION]: " + e.getMessage());
+                log.info(Instant.now() + " " + Thread.currentThread().getName() + " [EXCEPCION]: " + e.getMessage());
                 e.printStackTrace();
             }
         });

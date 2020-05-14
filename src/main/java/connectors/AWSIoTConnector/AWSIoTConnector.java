@@ -6,6 +6,8 @@ import com.amazonaws.services.iot.client.AWSIotMqttClient;
 import com.amazonaws.services.iot.client.AWSIotQos;
 import connectors.IoTConnector;
 import connectors.IoTConnectorException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import utils.SampleUtil;
 
 import java.io.FileInputStream;
@@ -14,6 +16,8 @@ import java.util.Properties;
 
 
 public class AWSIoTConnector implements IoTConnector {
+
+    static Logger log = LoggerFactory.getLogger(AWSIoTConnector.class);
 
 
     private String clientEndpoint;       // replace <prefix> and <region> with your own
@@ -96,12 +100,12 @@ public class AWSIoTConnector implements IoTConnector {
         AWSIotQos qos = AWSIotQos.QOS1;
         long timeout = 3000;                    // milliseconds
 
-        System.out.println(Instant.now() + " " + Thread.currentThread().getName() + "[MENSAJE] Por transmitirse: " + message);
+        log.info(Instant.now() + " " + Thread.currentThread().getName() + "[MENSAJE] Por transmitirse: " + message);
         MyMessage myMessage = new MyMessage(topic, qos, message);
 
         try {
             client.publish(myMessage, timeout);
-            System.out.println(Instant.now() + " " + Thread.currentThread().getName() + "[MENSAJE] Transmitido con éxito");
+            log.info(Instant.now() + " " + Thread.currentThread().getName() + "[MENSAJE] Transmitido con éxito");
         } catch (AWSIotException e) {
             throw new IoTConnectorException(e);
         }
