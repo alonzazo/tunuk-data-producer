@@ -1,6 +1,6 @@
 name: tunuk-data-producer
 title: Tunuk DataProducer
-version: '0.3.4'
+version: '0.3.5'
 summary: IoT data producer for public transportation units monitoring
 description: |
   Tunuk DataProducer is a software application to extract, filter, process
