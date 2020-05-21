@@ -17,7 +17,7 @@ architectures:
 apps:
   tunuk-data-producer:
     command:
-      java -jar $SNAP/jar/tunuk-data-producer-1.0-SNAPSHOT.jar
+      java -jar $SNAP/jar/tunuk-data-producer-1.0-SNAPSHOT-jar-with-dependencies.jar
     environment:
       JAVA_HOME: $SNAP/usr/lib/jvm/java-8-openjdk-amd64
       PATH: $JAVA_HOME/jre/bin:$PATH
