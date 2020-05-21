@@ -24,16 +24,13 @@ import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.function.Function;
 
-/*import org.apache.log4j.Logger;
-import org.apache.log4j.LogManager;*/
-
 public class DataProducerApplication {
 
     public static final Logger log = LoggerFactory.getLogger(DataProducerApplication.class);
 
     private static final String IDENTITY_FILE_PATH = "configurations/identity.properties";
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
 
         try {
 
@@ -47,8 +44,11 @@ public class DataProducerApplication {
                 configurations = loadConfigurations(DataProducerApplication.class.getResource("configurations/configuration.properties").getPath());
             } else if (argList.contains("--aws")) {
                 configurations = loadConfigurations("configurations/producers-config.properties");
-            } else {
+            } else if (argList.contains("--default-config")) {
                 configurations = loadConfigurations("configurations/producers-config.properties");
+            }
+            else {
+                configurations = loadConfigurations();
             }
 
             // Cargar datos de identidad del bus
@@ -355,51 +355,14 @@ public class DataProducerApplication {
         currentProperties.load(new FileReader(filePath));
         return currentProperties;
 
-        /*// Se carga el archivo
-        FileReader fileReader = new FileReader(filePath);
+    }
 
-        // Se monta en un Scanner que separe cada linea por un '\n'
-        Scanner scanner = new Scanner(fileReader);
-        scanner.useDelimiter("\n");
-
-        // Inicializamos contenedores y variables
-        List<Map.Entry<String, Properties>> producersList = new LinkedList<>();
-        int LINES_LIMIT = 1024;
+    private static Properties loadConfigurations() throws IOException {
 
         Properties currentProperties = new Properties();
-        String currentProducerName = "";
+        currentProperties.load(new StringReader(System.getenv().toString().replaceAll(",","\n").replaceAll("\\{","").replaceAll("}","")));
+        return currentProperties;
 
-        // Se parsea por cada linea
-        for (int i = 0; scanner.hasNext() && i < LINES_LIMIT; i++){
-            String line = scanner.next();
-
-            // Si la linea comienza con un # es un comentario, se ignora
-            if (line.length() > 0 && line.trim().charAt(0) == '#'){
-                continue;
-            }
-            // Si corresponde a un par llave valor se agrega al currentProperties
-            else if (line.matches("[^=]+=[^=]*")){
-                String[] keyValue = line.split("=");
-                currentProperties.put( keyValue[0].trim(), keyValue[1].trim() );
-
-                // Si al leer es la última línea permitida o del archivo se agrega como un par Nombre de productor y sus propiedades
-                if (i == LINES_LIMIT - 1 || !scanner.hasNext()){
-                    producersList.add(new AbstractMap.SimpleEntry<>(currentProducerName,currentProperties));
-                }
-            }
-            // Si la linea no esta vacia, es decir, es un nombre nuevo de productor entonces
-            else if (!line.trim().equals("")){
-                // Si el nombre del productor no esta vacio
-                if (!currentProducerName.equals("")){
-                    // Se agrega un par Nombre de productor y sus propiedades
-                    producersList.add(new AbstractMap.SimpleEntry<>(currentProducerName,currentProperties));
-                    currentProperties = new Properties();
-                }
-                // Finalmente, el nuevo nombre de productor se asigna como Nombre de productor actual
-                currentProducerName = line.trim();
-            }
-        }
-        return producersList;*/
     }
 
     private static String composeMessage(String identity, List<Map<String, String>> dataList) {
