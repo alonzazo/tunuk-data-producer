@@ -1,3 +1,4 @@
+import org.junit.jupiter.api.Test;
 import producers.DataProducer;
 import producers.GPSDataProducer.Dell3003RxtxGPSDataProducer;
 import producers.GPSDataProducer.HongdianH8922SGPSDataProducer;
@@ -19,12 +20,14 @@ class Pair<T,U> extends AbstractMap.SimpleEntry<T,U> {
 
 public class UnitTests {
 
-    private static void dell3003rxtxGPSDataDriver() throws Exception {
+    @Test
+    private void dell3003rxtxGPSDataDriver() throws Exception {
         Dell3003RxtxGPSDataProducer rxtxGPSDataDriver = new Dell3003RxtxGPSDataProducer("/dev/ttyHS0",new StreamingEventBus());
         rxtxGPSDataDriver.startProduction();
     }
 
-    private static void parseSentence(){
+    @Test
+    private void parseSentence(){
 
         Dell3003RxtxGPSDataProducer rxtxGPSDataDriver = new Dell3003RxtxGPSDataProducer("/dev/ttyHS0",new StreamingEventBus());
 
@@ -45,14 +48,16 @@ public class UnitTests {
         //System.out.println(result);
     }
 
-    private static void H8922STest() throws Exception {
+    @Test
+    private void H8922STest() throws Exception {
 
         DataProducer gpsData = new HongdianH8922SGPSDataProducer(2502, new StreamingEventBus());
         gpsData.startProduction();
 
     }
 
-    private static void configurationProps() throws Exception{
+    @Test
+    private void configurationProps() throws Exception{
         System.out.println(System.getProperty("user.dir"));
         FileReader fileReader = new FileReader("src/main/resources/configurations/producers-config.properties");
 
@@ -91,33 +96,9 @@ public class UnitTests {
         System.out.println(producersList);
     }
 
-    public static void main(String args[]){
-        try {
+    @Test
+    public void testEnvironment(){
 
-            /*dell3003rxtxGPSDataDriver();*/
-
-            /*parseSentence();*/
-
-            /*H8922STest();*/
-
-            /*configurationProps();*/
-
-            /*List<Map<String,String>> list = new LinkedList<>();
-
-            list.add(new HashMap<>());
-            list.add(new HashMap<>());
-
-            list.clear();
-
-            list.add(new HashMap<>());
-            list.add(new HashMap<>());*/
-/*
-            list.clear();*/
-
-
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-
+        System.out.println(System.getenv());
     }
 }

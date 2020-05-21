@@ -4,8 +4,8 @@ version: '0.2.4'
 summary: IoT data producer for public transportation units monitoring
 description: |
   Tunuk DataProducer is a software application to extract, filter, process
-  and send data to a message receiver. Tunuk leads an adaptative model
-  where different controllers can be selected to extract data from CANBus
+  and send data to a message receiver. Tunuk follows an adaptative model
+  which different controllers can be selected to extract data from CANBus
   sensors, APC devices, GPS and more, depending on your gateway capabilities.
 
 base: core18
