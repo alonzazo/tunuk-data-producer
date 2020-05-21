@@ -51,6 +51,8 @@ public class DataProducerApplication {
                 configurations = loadConfigurations();
             }
 
+            System.out.println(String.format("Configurations: %s",configurations));
+
             // Cargar datos de identidad del bus
             if (!configurations.containsKey("dataproducer.id")){
                 if (argList.contains("--debug")) {
