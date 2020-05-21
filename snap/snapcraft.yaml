@@ -11,6 +11,9 @@ description: |
 base: core18
 grade: stable
 confinement: strict
+architectures:
+  - amd64
+  - arm64
 apps:
   tunuk-data-producer:
     command:
@@ -19,9 +22,8 @@ apps:
       JAVA_HOME: $SNAP/usr/lib/jvm/java-8-openjdk-amd64
       PATH: $JAVA_HOME/jre/bin:$PATH
     plugs:
-      - home
       - network
-      - cups-control
+      - io-ports-control
 
 parts:
   tunuk-data-producer:
