@@ -26,6 +26,7 @@
                         <index>true</index>
                         <manifest>
                             <addClasspath>true</addClasspath>
+                            <mainClass>DataProducerApplication</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
