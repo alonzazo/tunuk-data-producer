@@ -1,7 +1,107 @@
 #!/bin/sh -e
 
-env dataproducer.id="$(snapctl get dataproducer.id)"
-env dataproducer.producers="$(snapctl get dataproducer.producers)"
-env dataproducer.subscribers="$(snapctl get dataproducer.subscribers)"
+echo "" > $SNAP_DATA/config.properties
+
+if [ "$(snapctl get dataproducer.id)" != "" ]
+then
+echo dataproducer.id="$(snapctl get dataproducer.id)" >> $SNAP_DATA/config.properties
+fi
+
+# Configuración de productores
+if [ "$(snapctl get dataproducer.producers)" != "" ]
+then
+
+PRODUCERS_PROFILES=$(snapctl get dataproducer.producers)
+echo dataproducer.producers="$PRODUCERS_PROFILES" >> $SNAP_DATA/config.properties
+
+profiles=$(echo "$PRODUCERS_PROFILES" | tr "," "\n")
+
+for profile in $profiles
+do
+
+    ## COMMON PROPERTIES
+    properties="type databus.mode databus.interval"
+    properties=$(echo "$properties" | tr " " "\n")
+    for property in $properties
+    do
+      if [ "$(snapctl get $profile.$property)" != "" ]
+      then
+        echo "$profile.$property=$(snapctl get $profile.$property)" >> $SNAP_DATA/config.properties
+      fi
+    done
+
+    #HELLA_APC_ECO_RS485 PUSH_NOTIFICATION HONGDIAN_H8922S
+    properties="producer.doorid producer.ipaddress producer.port"
+    properties=$(echo "$properties" | tr " " "\n")
+    for property in $properties
+    do
+      if [ "$(snapctl get $profile.$property)" != "" ]
+      then
+        echo "$profile.$property=$(snapctl get $profile.$property)" >> $SNAP_DATA/config.properties
+      fi
+    done
+
+    #DELL_3003_RXTX ADAFRUIT_ULTIMATE
+    properties="producer.serialport"
+    properties=$(echo "$properties" | tr " " "\n")
+    for property in $properties
+    do
+      if [ "$(snapctl get $profile.$property)" != "" ]
+      then
+        echo "$profile.$property=$(snapctl get $profile.$property)" >> $SNAP_DATA/config.properties
+      fi
+    done
+
+    #PUSH_NOTIFICATION
+    properties="producer.devices"
+    properties=$(echo "$properties" | tr " " "\n")
+    for property in $properties
+    do
+      if [ "$(snapctl get $profile.$property)" != "" ]
+      then
+        echo "$profile.$property=$(snapctl get $profile.$property)" >> $SNAP_DATA/config.properties
+      fi
+    done
+
+done
+fi
+
+# Configuración de suscriptores
+if [ "$(snapctl get dataproducer.subscribers)" != "" ]
+then
+
+SUBSCRIBERS_PROFILES="$(snapctl get dataproducer.subscribers)"
+echo dataproducer.subscribers="$SUBSCRIBERS_PROFILES" >> $SNAP_DATA/config.properties
+
+profiles=$(echo "$SUBSCRIBERS_PROFILES" | tr "," "\n")
+
+for profile in $profiles
+do
+
+    ## COMMON PROPERTIES
+    properties="type databus.mode databus.interval subscriber.connector subscriber.filters"
+    properties=$(echo "$properties" | tr " " "\n")
+    for property in $properties
+    do
+      if [ "$(snapctl get $profile.$property)" != "" ]
+      then
+
+        echo "$profile.$property=$(snapctl get $profile.$property)" >> $SNAP_DATA/config.properties
+
+        if [ "$property" = "subscriber.connector" ]
+        then
+          # KAFKA_PRODUCER
+          if [ "$(snapctl get $profile.$property."$(snapctl get $profile.$property)".ipaddress)" != "" ]
+          then
+              echo "$profile.$property.$(snapctl get $profile.$property).ipaddress=$(snapctl get $profile.$property."$(snapctl get $profile.$property)".ipaddress)" >> $SNAP_DATA/config.properties
+          fi
+        fi
+
+      fi
+    done
+
+done
+
+fi
 
 echo "Configurations set"
