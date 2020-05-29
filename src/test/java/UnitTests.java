@@ -1,8 +1,10 @@
+import eventbuses.StreamingEventBus;
+import jssc.SerialPort;
+import jssc.SerialPortException;
 import org.junit.jupiter.api.Test;
 import producers.DataProducer;
 import producers.GPSDataProducer.Dell3003RxtxGPSDataProducer;
 import producers.GPSDataProducer.HongdianH8922SGPSDataProducer;
-import eventbuses.StreamingEventBus;
 
 import java.io.FileReader;
 import java.util.*;
@@ -100,5 +102,13 @@ public class UnitTests {
     public void testEnvironment(){
 
         System.out.println(System.getenv());
+    }
+
+    @Test
+    public void testSerialCANBUS() throws SerialPortException {
+        SerialPort serialPort = new SerialPort("/dev/ttyUSB0");
+        serialPort.openPort();
+        serialPort.setParams(9600, 8, 1, 0);
+
     }
 }

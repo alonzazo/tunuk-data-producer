@@ -46,6 +46,8 @@ public class DataProducerApplication {
                 configurations = loadConfigurations("configurations/producers-config.properties");
             } else if (argList.contains("--default-config")) {
                 configurations = loadConfigurations("configurations/producers-config.properties");
+            }else if (argList.contains("--snap-version")) {
+                configurations = loadConfigurations(System.getenv("SNAP_DATA")+ "/config.properties");
             }
             else {
                 configurations = loadConfigurations();
@@ -353,6 +355,7 @@ public class DataProducerApplication {
 
     private static Properties loadConfigurations(String filePath) throws IOException {
 
+        System.out.println(filePath);
         Properties currentProperties = new Properties();
         currentProperties.load(new FileReader(filePath));
         return currentProperties;

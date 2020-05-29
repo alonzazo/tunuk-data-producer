@@ -5,6 +5,8 @@ import connectors.IoTConnectorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
+
 public class StandardOutputConnector implements IoTConnector {
 
     static Logger log = LoggerFactory.getLogger(StandardOutputConnector.class);
@@ -24,7 +26,7 @@ public class StandardOutputConnector implements IoTConnector {
 
     @Override
     public void publish(String topic, String message) throws IoTConnectorException {
-        log.info("TOPIC: " + topic + "\nMESSAGE: \n" + message);
+        System.out.println(Instant.now() + " [" + Thread.currentThread().getName() + "] TOPIC: " + topic + "\nMESSAGE: \n" + message);
     }
 
     @Override
