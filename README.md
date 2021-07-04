@@ -27,8 +27,8 @@ Subscribers controllers supported:
 * Amazon AWS
 
 Fail tolerance systems supported:
-* Persistencia pesimista (Eager)
-* Persistencia optimista (Lazy)
+* Eager persistence
+* Lazy persistance
 
 Streaming modes:
 * Micro-batches
