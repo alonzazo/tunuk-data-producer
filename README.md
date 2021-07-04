@@ -40,4 +40,8 @@ Data filters:
 * GPS JustOnce
 
 ## Roadmap
-
+1. This data producer has to be:
+   1. Secure
+   2. Reliable
+   3. Adaptable
+   4. Configurable
