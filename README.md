@@ -44,3 +44,6 @@ Data filters:
    2. Reliable
    3. Adaptable
    4. Configurable
+
+## References
+[1. Akidau,T. Streaming systems](http://streamingsystems.net/)
